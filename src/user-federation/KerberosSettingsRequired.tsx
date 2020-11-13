@@ -3,21 +3,32 @@ import {
   FormGroup,
   Select,
   SelectOption,
+  SelectVariant,
   Switch,
   TextInput,
 } from "@patternfly/react-core";
 import { useTranslation } from "react-i18next";
-import React from "react";
 import { HelpItem } from "../components/help-enabler/HelpItem";
+import React, { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { UserFederationKerberosRequiredRepresentation } from "./models/user-federation";
 
 export const KerberosSettingsRequired = () => {
   const { t } = useTranslation("user-federation");
   const helpText = useTranslation("user-federation-help").t;
 
+  const [isEditModeDropdownOpen, setIsEditModeDropdownOpen] = useState(false);
+  const { register, handleSubmit, control } = useForm<
+    UserFederationKerberosRequiredRepresentation
+  >();
+  const onSubmit = (data: UserFederationKerberosRequiredRepresentation) => {
+    console.log(data);
+  };
+
   return (
     <>
       {/* Required settings */}
-      <Form isHorizontal>
+      <Form isHorizontal onSubmit={handleSubmit(onSubmit)}>
         <FormGroup
           label={t("consoleDisplayName")}
           labelIcon={
@@ -34,9 +45,8 @@ export const KerberosSettingsRequired = () => {
             isRequired
             type="text"
             id="kc-console-display-name"
-            name="kc-console-display-name"
-            // value={value1}
-            // onChange={this.handleTextInputChange1}
+            name="consoleDisplayName"
+            ref={register}
           />
         </FormGroup>
 
@@ -56,9 +66,8 @@ export const KerberosSettingsRequired = () => {
             isRequired
             type="text"
             id="kc-kerberos-realm"
-            name="kc-kerberos-realm"
-            // value={value1}
-            // onChange={this.handleTextInputChange1}
+            name="kerberosRealm"
+            ref={register}
           />
         </FormGroup>
 
@@ -78,9 +87,8 @@ export const KerberosSettingsRequired = () => {
             isRequired
             type="text"
             id="kc-server-principal"
-            name="kc-server-principal"
-            // value={value1}
-            // onChange={this.handleTextInputChange1}
+            name="serverPrincipal"
+            ref={register}
           />
         </FormGroup>
 
@@ -100,9 +108,8 @@ export const KerberosSettingsRequired = () => {
             isRequired
             type="text"
             id="kc-key-tab"
-            name="kc-key-tab"
-            // value={value1}
-            // onChange={this.handleTextInputChange1}
+            name="keyTab"
+            ref={register}
           />
         </FormGroup>
 
@@ -118,14 +125,22 @@ export const KerberosSettingsRequired = () => {
           fieldId="kc-debug"
           hasNoPaddingTop
         >
-          <Switch
-            id={"kc-debug"}
-            isChecked={true}
-            isDisabled={false}
-            onChange={() => undefined as any}
-            label={t("common:on")}
-            labelOff={t("common:off")}
-          />
+          {" "}
+          <Controller
+            name="debug"
+            defaultValue={false}
+            control={control}
+            render={({ onChange, value }) => (
+              <Switch
+                id={"kc-debug"}
+                isDisabled={false}
+                onChange={onChange}
+                isChecked={value}
+                label={t("common:on")}
+                labelOff={t("common:off")}
+              />
+            )}
+          ></Controller>
         </FormGroup>
 
         <FormGroup
@@ -140,14 +155,21 @@ export const KerberosSettingsRequired = () => {
           fieldId="kc-allow-password-authentication"
           hasNoPaddingTop
         >
-          <Switch
-            id={"kc-allow-password-authentication"}
-            isChecked={true}
-            isDisabled={false}
-            onChange={() => undefined as any}
-            label={t("common:on")}
-            labelOff={t("common:off")}
-          />
+          <Controller
+            name="allowPasswordAuthentication"
+            defaultValue={false}
+            control={control}
+            render={({ onChange, value }) => (
+              <Switch
+                id={"kc-allow-password-authentication"}
+                isDisabled={false}
+                onChange={onChange}
+                isChecked={value}
+                label={t("common:on")}
+                labelOff={t("common:off")}
+              />
+            )}
+          ></Controller>
         </FormGroup>
 
         <FormGroup
@@ -161,29 +183,31 @@ export const KerberosSettingsRequired = () => {
           }
           fieldId="kc-edit-mode"
         >
-          <Select
-            toggleId="kc-edit-mode"
-            // isOpen={openType}
-            onToggle={() => {}}
-            // variant={SelectVariant.single}
-            // value={selected}
-            // selections={selected}
-            // onSelect={(_, value) => {
-            //   setSelected(value as string);
-            //   setOpenType(false);
-            // }}
-            aria-label="edit mode" // TODO
-          >
-            {/* {configFormats.map((configFormat) => ( */}
-            <SelectOption
-              key={"key"}
-              value={"value"}
-              // isSelected={selected === configFormat.id}
-            >
-              {"display name"}
-            </SelectOption>
-            {/* ))} */}
-          </Select>
+          {" "}
+          <Controller
+            name="editMode"
+            defaultValue=""
+            control={control}
+            render={({ onChange, value }) => (
+              <Select
+                toggleId="kc-edit-mode"
+                required
+                onToggle={() =>
+                  setIsEditModeDropdownOpen(!isEditModeDropdownOpen)
+                }
+                isOpen={isEditModeDropdownOpen}
+                onSelect={(_, value) => {
+                  onChange(value as string);
+                  setIsEditModeDropdownOpen(false);
+                }}
+                selections={value}
+                variant={SelectVariant.single}
+              >
+                <SelectOption key={0} value="Choose..." isPlaceholder />
+                <SelectOption key={1} value="UNSYNCED" />
+              </Select>
+            )}
+          ></Controller>
         </FormGroup>
 
         <FormGroup
@@ -198,15 +222,23 @@ export const KerberosSettingsRequired = () => {
           fieldId="kc-update-first-login"
           hasNoPaddingTop
         >
-          <Switch
-            id={"kc-update-first-login"}
-            isChecked={true}
-            isDisabled={false}
-            onChange={() => undefined as any}
-            label={t("common:on")}
-            labelOff={t("common:off")}
-          />
+          <Controller
+            name="updateFirstLogin"
+            defaultValue={false}
+            control={control}
+            render={({ onChange, value }) => (
+              <Switch
+                id={"kc-update-first-login"}
+                isDisabled={false}
+                onChange={onChange}
+                isChecked={value}
+                label={t("common:on")}
+                labelOff={t("common:off")}
+              />
+            )}
+          ></Controller>
         </FormGroup>
+        <button type="submit">Test submit</button>
       </Form>
     </>
   );
