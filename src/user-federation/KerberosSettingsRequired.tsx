@@ -238,7 +238,8 @@ export const KerberosSettingsRequired = () => {
             )}
           ></Controller>
         </FormGroup>
-        <button type="submit">Test submit</button>
+        {/* Use this button to test for submit */}
+        {/* <button type="submit">Test submit</button> */}
       </Form>
     </>
   );
