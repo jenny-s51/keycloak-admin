@@ -73,6 +73,10 @@ export interface UserFederationKerberosRequiredRepresentation {
 
 export interface UserFederationKerberosCacheRepresentation {
   cachePolicy?: Boolean;
+  evictionDay?: string;
+  evictionHour?: string;
+  evictionMinute?: string;
+  maxLifespan?: string;
 }
 
 export interface UserFederationKerberosSettings

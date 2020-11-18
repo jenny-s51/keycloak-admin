@@ -172,6 +172,7 @@ export const KerberosSettingsRequired = () => {
           ></Controller>
         </FormGroup>
 
+        {/* TODO: Field shows only if allowPasswordAuthentication is TRUE */}
         <FormGroup
           label={t("editMode")}
           labelIcon={
