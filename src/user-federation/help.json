@@ -13,7 +13,7 @@
     "bindDnHelp": "DN of the LDAP admin, which will be used by Keycloak to access LDAP server",
     "bindCredentialsHelp": "Password of LDAP admin. This field is able to obtain its value from vault, use ${vault.ID} format.",
 
-    "editModeHelp": "READ_ONLY is a read-only LDAP store. WRITABLE means data will be synced back to LDAP on demand. UNSYNCED means user data will be imported, but not synced back to LDAP.",
+    "editModeLdapHelp": "READ_ONLY is a read-only LDAP store. WRITABLE means data will be synced back to LDAP on demand. UNSYNCED means user data will be imported, but not synced back to LDAP.",
     "usersDNHelp": "Full DN of LDAP tree where your users are. This DN is the parent of LDAP users. It could be for example 'ou=users,dc=example,dc=com' assuming that your typical user will have DN like 'uid='john',ou=users,dc=example,dc=com'",
     "usernameLdapAttributeHelp": "Name of LDAP attribute, which is mapped as Keycloak username. For many LDAP server vendors it can be 'uid'. For Active directory it can be 'sAMAccountName' or 'cn'. The attribute should be filled for all LDAP user records you want to import from LDAP to Keycloak.",
     "rdnLdapAttributeHelp": "Name of LDAP attribute, which is used as RDN (top attribute) of typical user DN. Usually it's the same as Username LDAP attribute, however it is not required. For example for Active directory, it is common to use 'cn' as RDN attribute when username attribute might be 'sAMAccountName'.",
@@ -50,6 +50,7 @@
     "keyTabHelp": "Location of Kerberos KeyTab file containing the credentials of server principal. For example, /etc/krb5.keytab",
     "debugHelp": "Enable/disable debug logging to standard output for Krb5LoginModule",
     "allowPasswordAuthenticationHelp": "Enable/disable possibility of username/password authentication against Kerberos database",
+    "editModeKerberosHelp": "READ_ONLY means that password updates are not allowed and user always authenticates with Kerberos password. UNSYNCED means that the user can change the password in the Keycloak database and this one will be used instead of the Kerberos password",
     "updateFirstLoginHelp": "Update profile on first login"
   }
 }

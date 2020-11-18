@@ -177,7 +177,7 @@ export const KerberosSettingsRequired = () => {
           label={t("editMode")}
           labelIcon={
             <HelpItem
-              helpText={helpText("editModeHelp")}
+              helpText={helpText("editModeKerberosHelp")}
               forLabel={t("editMode")}
               forID="kc-edit-mode"
             />
