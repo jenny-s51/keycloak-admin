@@ -37,6 +37,20 @@ export const KerberosSettingsCache = () => {
     console.log(data);
   };
 
+  const hourOptions = [
+    <SelectOption key={0} value="Choose..." isPlaceholder />,
+  ];
+  for (let index = 0; index < 24; index++) {
+    hourOptions.push(<SelectOption key={index + 1} value={index} />);
+  }
+
+  const minuteOptions = [
+    <SelectOption key={0} value="Choose..." isPlaceholder />,
+  ];
+  for (let index = 0; index < 60; index++) {
+    minuteOptions.push(<SelectOption key={index + 1} value={index} />);
+  }
+
   return (
     <>
       {/* Cache settings */}
@@ -111,13 +125,13 @@ export const KerberosSettingsCache = () => {
                 variant={SelectVariant.single}
               >
                 <SelectOption key={0} value="Choose..." isPlaceholder />
-                <SelectOption key={1} value="Sunday" />
-                <SelectOption key={2} value="Monday" />
-                <SelectOption key={3} value="Tuesday" />
-                <SelectOption key={4} value="Wednesday" />
-                <SelectOption key={5} value="Thursday" />
-                <SelectOption key={6} value="Friday" />
-                <SelectOption key={7} value="Saturday" />
+                <SelectOption key={1} value={t("common:Sunday")} />
+                <SelectOption key={2} value={t("common:Monday")} />
+                <SelectOption key={3} value={t("common:Tuesday")} />
+                <SelectOption key={4} value={t("common:Wednesday")} />
+                <SelectOption key={5} value={t("common:Thursday")} />
+                <SelectOption key={6} value={t("common:Friday")} />
+                <SelectOption key={7} value={t("common:Saturday")} />
               </Select>
             )}
           ></Controller>
@@ -153,11 +167,7 @@ export const KerberosSettingsCache = () => {
                 selections={value}
                 variant={SelectVariant.single}
               >
-                <SelectOption key={0} value="Choose..." isPlaceholder />
-                <SelectOption key={1} value="00" />
-                <SelectOption key={2} value="01" />
-                <SelectOption key={3} value="..." />
-                <SelectOption key={4} value="23" />
+                {hourOptions}
               </Select>
             )}
           ></Controller>
@@ -193,11 +203,7 @@ export const KerberosSettingsCache = () => {
                 selections={value}
                 variant={SelectVariant.single}
               >
-                <SelectOption key={0} value="Choose..." isPlaceholder />
-                <SelectOption key={1} value="00" />
-                <SelectOption key={2} value="01" />
-                <SelectOption key={3} value="..." />
-                <SelectOption key={4} value="59" />
+                {minuteOptions}
               </Select>
             )}
           ></Controller>
