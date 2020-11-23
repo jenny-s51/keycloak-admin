@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { HelpItem } from "../components/help-enabler/HelpItem";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { UserFederationKerberosCacheRepresentation } from "./models/user-federation";
+import ComponentRepresentation from "keycloak-admin/lib/defs/componentRepresentation";
 
 export const KerberosSettingsCache = () => {
   const { t } = useTranslation("user-federation");
@@ -30,31 +30,26 @@ export const KerberosSettingsCache = () => {
     false
   );
 
-  const { handleSubmit, control, register } = useForm<
-    UserFederationKerberosCacheRepresentation
-  >();
-  const onSubmit = (data: UserFederationKerberosCacheRepresentation) => {
-    console.log(data);
-  };
+  const { control, register } = useForm<ComponentRepresentation>();
 
   const hourOptions = [
     <SelectOption key={0} value="Choose..." isPlaceholder />,
   ];
-  for (let index = 0; index < 24; index++) {
+  for (let index = 1; index <= 24; index++) {
     hourOptions.push(<SelectOption key={index + 1} value={index} />);
   }
 
   const minuteOptions = [
     <SelectOption key={0} value="Choose..." isPlaceholder />,
   ];
-  for (let index = 0; index < 60; index++) {
+  for (let index = 1; index <= 60; index++) {
     minuteOptions.push(<SelectOption key={index + 1} value={index} />);
   }
 
   return (
     <>
       {/* Cache settings */}
-      <Form isHorizontal onSubmit={handleSubmit(onSubmit)}>
+      <Form isHorizontal>
         <FormGroup
           label={t("cachePolicy")}
           labelIcon={
