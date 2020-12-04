@@ -27,7 +27,6 @@ export const RealmRoleForm = ({
   reset,
 }: RealmRoleFormProps) => {
   const { t } = useTranslation("roles");
-
   return (
     <FormAccess
       isHorizontal
