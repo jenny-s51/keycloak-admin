@@ -31,6 +31,7 @@ import { ViewHeader } from "../components/view-header/ViewHeader";
 
 import { useAdminClient } from "../context/auth/AdminClient";
 import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
+import { RoleAttributes } from "./RoleAttributes";
 
 type RoleFormType = {
   form: UseFormMethods;
@@ -194,6 +195,12 @@ export const RealmRolesForm = () => {
               title={<TabTitleText>{t("details")}</TabTitleText>}
             >
               <RoleForm form={form} save={save} editMode={true} />
+            </Tab>
+            <Tab
+              eventKey={0}
+              title={<TabTitleText>{t("attributes")}</TabTitleText>}
+            >
+              <RoleAttributes form={form} save={() => {}} />
             </Tab>
           </Tabs>
         )}
