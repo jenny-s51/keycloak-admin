@@ -158,7 +158,12 @@ export const RealmRoleTabs = () => {
               eventKey="details"
               title={<TabTitleText>{t("details")}</TabTitleText>}
             >
-              <RealmRoleForm form={form} save={save} editMode={true} />
+              <RealmRoleForm
+                reset={() => form.reset(role)}
+                form={form}
+                save={save}
+                editMode={true}
+              />
             </Tab>
             <Tab
               eventKey="attributes"
@@ -168,11 +173,19 @@ export const RealmRoleTabs = () => {
                 form={form}
                 save={save}
                 array={{ fields, append, remove }}
+                reset={() => form.reset(role)}
               />
             </Tab>
           </KeycloakTabs>
         )}
-        {!id && <RealmRoleForm form={form} save={save} editMode={false} />}
+        {!id && (
+          <RealmRoleForm
+            reset={() => form.reset()}
+            form={form}
+            save={save}
+            editMode={false}
+          />
+        )}
       </PageSection>
     </>
   );
