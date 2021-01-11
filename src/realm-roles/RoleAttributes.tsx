@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrayField, UseFormMethods } from "react-hook-form";
 import { ActionGroup, Button, TextInput } from "@patternfly/react-core";
@@ -22,7 +22,6 @@ export type KeyValueType = { key: string; value: string };
 type RoleAttributesProps = {
   form: UseFormMethods<RoleFormType>;
   save: (role: RoleFormType) => void;
-  reset: () => void;
   array: {
     fields: Partial<ArrayField<Record<string, any>, "id">>[];
     append: (
@@ -37,7 +36,6 @@ export const RoleAttributes = ({
   form: { handleSubmit, register, formState, errors },
   save,
   array: { fields, append, remove },
-  reset,
 }: RoleAttributesProps) => {
   const { t } = useTranslation("roles");
 
@@ -148,7 +146,7 @@ export const RoleAttributes = ({
           >
             {t("common:save")}
           </Button>
-          <Button onClick={reset} variant="link">
+          <Button onClick={() => {}} variant="link">
             {t("common:reload")}
           </Button>
         </ActionGroup>
