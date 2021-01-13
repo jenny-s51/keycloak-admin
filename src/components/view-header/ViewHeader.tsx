@@ -23,6 +23,8 @@ import { FormattedLink } from "../external-link/FormattedLink";
 export type ViewHeaderProps = {
   titleKey: string;
   badge?: string;
+  badgeId?: string;
+  badgeIsRead?: boolean;
   subKey: string;
   actionsDropdownId?: string;
   subKeyLinkProps?: ButtonProps;
@@ -37,6 +39,8 @@ export const ViewHeader = ({
   actionsDropdownId,
   titleKey,
   badge,
+  badgeId,
+  badgeIsRead,
   subKey,
   subKeyLinkProps,
   dropdownItems,
@@ -71,7 +75,9 @@ export const ViewHeader = ({
               </LevelItem>
               {badge && (
                 <LevelItem>
-                  <Badge>{badge}</Badge>
+                  <Badge id={badgeId} isRead={badgeIsRead}>
+                    {badge}
+                  </Badge>
                 </LevelItem>
               )}
             </Level>
