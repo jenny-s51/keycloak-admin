@@ -7,6 +7,7 @@ import {
   DropdownGroup,
   DropdownItem,
   DropdownToggle,
+  Modal,
   ModalVariant,
   PageSection,
   Pagination,
@@ -33,7 +34,7 @@ const arrayToAttributes = (attributeArray: KeyValueType[]) => {
   return attributeArray.reduce((acc, attribute) => {
     acc[attribute.key] = [attribute.value];
     return acc;
-  }, initValue);
+  }, initValue); 
 };
 
 const attributesToArray = (attributes: { [key: string]: string }): any => {
@@ -70,12 +71,13 @@ export const RealmRoleTabs = () => {
 
   const { addAlert } = useAlerts();
 
-  // const loader = async () => await adminClient.roles.find();
+  const loader = async () => await adminClient.roles.find();
+  const [open, setOpen] = useState(false);
 
-  const toggleAddMapperDialog = async () => {
-    setSelectedRows(await rolesList);
-    setAddMapperDialogOpen(!addMapperDialogOpen);
-  };
+  // const toggleAddMapperDialog = async () => {
+  //   setSelectedRows(await rolesList);
+  //   setAddMapperDialogOpen(!addMapperDialogOpen);
+  // };
 
   useEffect(() => {
     (async () => {
@@ -143,6 +145,27 @@ export const RealmRoleTabs = () => {
     },
   });
 
+  // const [toggleModal, AssociatedRolesModal] = useConfirmDialog({
+  //   titleKey: "roles:roleDeleteConfirm",
+  //   continueButtonLabel: "common:delete",
+  //   continueButtonVariant: ButtonVariant.danger,
+  //   variant: ModalVariant.large,
+  //   children: <>
+
+  //   </>,
+  //   onConfirm: async () => {
+  //     try {
+  //       await adminClient.roles.delById({ id });
+  //       addAlert(t("roleDeletedSuccess"), AlertVariant.success);
+  //       history.replace(`/${realm}/roles`);
+  //     } catch (error) {
+  //       addAlert(`${t("roleDeleteError")} ${error}`, AlertVariant.danger);
+  //     }
+  //   },
+  // });
+
+  const toggleModal = () => setOpen(!open);
+
   console.log("selected rows", selectedRows);
 
   // const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -162,6 +185,62 @@ export const RealmRoleTabs = () => {
     <>
       <DeleteConfirm />
       {/* <AssociatedRolesModal /> */}
+      {open && (
+        <Modal
+          title="What?"
+          isOpen={true}
+          onClose={toggleModal}
+          variant={ModalVariant.large}
+        >
+          <KeycloakDataTable
+            key="anoterhroleList"
+            loader={loader}
+            ariaLabelKey="roles:roleList"
+            searchPlaceholderKey="roles:searchFor"
+            canSelectAll
+            onSelect={(rows) => {
+              console.log("hahah rows", rows);
+              setSelectedRows([...rows]);
+            }}
+            actions={[
+              {
+                title: t("addAssociatedRolesText"),
+                onRowClick: () => {
+                  // setSelectedRole(role);
+                  // toggleDeleteDialog();
+                },
+              },
+            ]}
+            columns={[
+              {
+                name: "name",
+                displayKey: "roles:roleName",
+                // cellRenderer: RoleDetailLink,
+                // cellFormatters: [formattedLinkTableCell(), emptyFormatter()],
+              },
+              {
+                name: "composite",
+                displayKey: "roles:composite",
+                // cellFormatters: [boolFormatter(), emptyFormatter()],
+              },
+              {
+                name: "description",
+                displayKey: "roles:description",
+                // cellFormatters: [emptyFormatter()],
+              },
+            ]}
+            // emptyState={
+            //   <ListEmptyState
+            //     hasIcon={true}
+            //     message={t("noRolesInThisRealm")}
+            //     instructions={t("noRolesInThisRealmInstructions")}
+            //     primaryActionText={t("createRole")}
+            //     onPrimaryAction={goToCreate}
+            //   />
+            // }
+          />
+        </Modal>
+      )}
       <ViewHeader
         titleKey={name}
         subKey={id ? "" : "roles:roleCreateExplain"}
@@ -178,7 +257,7 @@ export const RealmRoleTabs = () => {
                 <DropdownItem
                   key="action"
                   component="button"
-                  onClick={() => toggleAddMapperDialog(true)}
+                  onClick={() => toggleModal()}
                 >
                   {t("addAssociatedRolesText")}
                 </DropdownItem>,
