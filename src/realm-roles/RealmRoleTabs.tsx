@@ -2,15 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import {
   AlertVariant,
+  Button,
   ButtonVariant,
-  Dropdown,
-  DropdownGroup,
   DropdownItem,
-  DropdownToggle,
   Modal,
   ModalVariant,
   PageSection,
-  Pagination,
   Tab,
   Tabs,
   TabTitleText,
@@ -27,14 +24,15 @@ import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
 import { RealmRoleForm } from "./RealmRoleForm";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable";
-import { CaretDownIcon, FilterIcon } from "@patternfly/react-icons";
+import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
+import { IFormatter, IFormatterValueType } from "@patternfly/react-table";
 
 const arrayToAttributes = (attributeArray: KeyValueType[]) => {
   const initValue: { [index: string]: string[] } = {};
   return attributeArray.reduce((acc, attribute) => {
     acc[attribute.key] = [attribute.value];
     return acc;
-  }, initValue); 
+  }, initValue);
 };
 
 const attributesToArray = (attributes: { [key: string]: string }): any => {
@@ -60,12 +58,7 @@ export const RealmRoleTabs = () => {
   const adminClient = useAdminClient();
   const [activeTab, setActiveTab] = useState(0);
   const { realm } = useRealm();
-  const [selectedRows, setSelectedRows] = useState<RoleRepresentation[]>([]);
-
-  // const mapperList = clientScope.protocolMappers!;
-  const rolesList = adminClient.roles.find();
-
-  // const [filter, setFilter] = useState<ProtocolMapperRepresentation[]>([]);
+  const [, setSelectedRows] = useState<RoleRepresentation[]>([]);
 
   const { id } = useParams<{ id: string }>();
 
@@ -73,11 +66,6 @@ export const RealmRoleTabs = () => {
 
   const loader = async () => await adminClient.roles.find();
   const [open, setOpen] = useState(false);
-
-  // const toggleAddMapperDialog = async () => {
-  //   setSelectedRows(await rolesList);
-  //   setAddMapperDialogOpen(!addMapperDialogOpen);
-  // };
 
   useEffect(() => {
     (async () => {
@@ -145,99 +133,68 @@ export const RealmRoleTabs = () => {
     },
   });
 
-  // const [toggleModal, AssociatedRolesModal] = useConfirmDialog({
-  //   titleKey: "roles:roleDeleteConfirm",
-  //   continueButtonLabel: "common:delete",
-  //   continueButtonVariant: ButtonVariant.danger,
-  //   variant: ModalVariant.large,
-  //   children: <>
-
-  //   </>,
-  //   onConfirm: async () => {
-  //     try {
-  //       await adminClient.roles.delById({ id });
-  //       addAlert(t("roleDeletedSuccess"), AlertVariant.success);
-  //       history.replace(`/${realm}/roles`);
-  //     } catch (error) {
-  //       addAlert(`${t("roleDeleteError")} ${error}`, AlertVariant.danger);
-  //     }
-  //   },
-  // });
-
   const toggleModal = () => setOpen(!open);
 
-  console.log("selected rows", selectedRows);
+  const boolFormatter = (): IFormatter => (data?: IFormatterValueType) => {
+    const boolVal = data?.toString();
 
-  // const [isDropdownOpen, setDropdownOpen] = useState(false);
-
-  // const dropdownItems = [
-  //   <DropdownGroup key="group 1">
-  //     <DropdownItem key="group 1 plaintext" component="div" isPlainText>Text</DropdownItem>
-  //     <DropdownItem key="group 1 plaintext2" component="div" isPlainText>More text</DropdownItem>
-  //   </DropdownGroup>,
-  // ];
-
-  // const onDropdownToggle = () => {
-  //   setDropdownOpen(!isDropdownOpen);
-  // };
+    return (boolVal
+      ? boolVal.charAt(0).toUpperCase() + boolVal.slice(1)
+      : undefined) as string;
+  };
 
   return (
     <>
       <DeleteConfirm />
-      {/* <AssociatedRolesModal /> */}
       {open && (
         <Modal
-          title="What?"
+          title={t("roles:associatedRolesModalTitle", { name })}
           isOpen={true}
           onClose={toggleModal}
           variant={ModalVariant.large}
+          actions={[
+            <Button key="confirm" variant="primary" onClick={toggleModal}>
+              Add
+            </Button>,
+            <Button key="cancel" variant="link" onClick={toggleModal}>
+              Cancel
+            </Button>,
+          ]}
         >
           <KeycloakDataTable
-            key="anoterhroleList"
+            key="role-list-modal"
             loader={loader}
             ariaLabelKey="roles:roleList"
             searchPlaceholderKey="roles:searchFor"
             canSelectAll
+            // isPaginated
             onSelect={(rows) => {
-              console.log("hahah rows", rows);
               setSelectedRows([...rows]);
             }}
-            actions={[
-              {
-                title: t("addAssociatedRolesText"),
-                onRowClick: () => {
-                  // setSelectedRole(role);
-                  // toggleDeleteDialog();
-                },
-              },
-            ]}
             columns={[
               {
                 name: "name",
                 displayKey: "roles:roleName",
-                // cellRenderer: RoleDetailLink,
-                // cellFormatters: [formattedLinkTableCell(), emptyFormatter()],
               },
               {
                 name: "composite",
                 displayKey: "roles:composite",
-                // cellFormatters: [boolFormatter(), emptyFormatter()],
+                cellFormatters: [boolFormatter()],
               },
               {
                 name: "description",
                 displayKey: "roles:description",
-                // cellFormatters: [emptyFormatter()],
               },
             ]}
-            // emptyState={
-            //   <ListEmptyState
-            //     hasIcon={true}
-            //     message={t("noRolesInThisRealm")}
-            //     instructions={t("noRolesInThisRealmInstructions")}
-            //     primaryActionText={t("createRole")}
-            //     onPrimaryAction={goToCreate}
-            //   />
-            // }
+            emptyState={
+              <ListEmptyState
+                hasIcon={true}
+                message={t("noRolesInThisRealm")}
+                instructions={t("noRolesInThisRealmInstructions")}
+                primaryActionText={t("createRole")}
+                // onPrimaryAction={goToCreate}
+              />
+            }
           />
         </Modal>
       )}
