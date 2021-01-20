@@ -2,11 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import {
   AlertVariant,
-  Button,
   ButtonVariant,
   DropdownItem,
-  Modal,
-  ModalVariant,
   PageSection,
   Tab,
   Tabs,
@@ -23,9 +20,7 @@ import { ViewHeader } from "../components/view-header/ViewHeader";
 import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
 import { RealmRoleForm } from "./RealmRoleForm";
 import { useRealm } from "../context/realm-context/RealmContext";
-import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable";
-import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
-import { IFormatter, IFormatterValueType } from "@patternfly/react-table";
+import { AssociatedRolesModal } from "./AssociatedRolesModal";
 
 const arrayToAttributes = (attributeArray: KeyValueType[]) => {
   const initValue: { [index: string]: string[] } = {};
@@ -58,13 +53,11 @@ export const RealmRoleTabs = () => {
   const adminClient = useAdminClient();
   const [activeTab, setActiveTab] = useState(0);
   const { realm } = useRealm();
-  const [, setSelectedRows] = useState<RoleRepresentation[]>([]);
 
   const { id } = useParams<{ id: string }>();
 
   const { addAlert } = useAlerts();
 
-  const loader = async () => await adminClient.roles.find();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -135,69 +128,14 @@ export const RealmRoleTabs = () => {
 
   const toggleModal = () => setOpen(!open);
 
-  const boolFormatter = (): IFormatter => (data?: IFormatterValueType) => {
-    const boolVal = data?.toString();
-
-    return (boolVal
-      ? boolVal.charAt(0).toUpperCase() + boolVal.slice(1)
-      : undefined) as string;
-  };
 
   return (
     <>
       <DeleteConfirm />
-      {open && (
-        <Modal
-          title={t("roles:associatedRolesModalTitle", { name })}
-          isOpen={true}
-          onClose={toggleModal}
-          variant={ModalVariant.large}
-          actions={[
-            <Button key="confirm" variant="primary" onClick={toggleModal}>
-              Add
-            </Button>,
-            <Button key="cancel" variant="link" onClick={toggleModal}>
-              Cancel
-            </Button>,
-          ]}
-        >
-          <KeycloakDataTable
-            key="role-list-modal"
-            loader={loader}
-            ariaLabelKey="roles:roleList"
-            searchPlaceholderKey="roles:searchFor"
-            canSelectAll
-            // isPaginated
-            onSelect={(rows) => {
-              setSelectedRows([...rows]);
-            }}
-            columns={[
-              {
-                name: "name",
-                displayKey: "roles:roleName",
-              },
-              {
-                name: "composite",
-                displayKey: "roles:composite",
-                cellFormatters: [boolFormatter()],
-              },
-              {
-                name: "description",
-                displayKey: "roles:description",
-              },
-            ]}
-            emptyState={
-              <ListEmptyState
-                hasIcon={true}
-                message={t("noRolesInThisRealm")}
-                instructions={t("noRolesInThisRealmInstructions")}
-                primaryActionText={t("createRole")}
-                // onPrimaryAction={goToCreate}
-              />
-            }
-          />
-        </Modal>
-      )}
+      <AssociatedRolesModal
+        open={open}
+        toggleDialog={() => setOpen(!open)}
+      />
       <ViewHeader
         titleKey={name}
         subKey={id ? "" : "roles:roleCreateExplain"}
