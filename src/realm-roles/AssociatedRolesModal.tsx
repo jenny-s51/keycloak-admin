@@ -7,7 +7,7 @@ import { useAdminClient } from "../context/auth/AdminClient";
 import RoleRepresentation from "keycloak-admin/lib/defs/roleRepresentation";
 import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable";
 import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
-// import { boolFormatter } from "../util";
+import { boolFormatter } from "../util";
 
 export type AssociatedRolesModalProps = {
   open: boolean;
@@ -60,7 +60,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
   const setupForm = (role: RoleRepresentation) => {
     Object.entries(role).map((entry) => {
       if (entry[0] === "attributes") {
-        form.setValue(entry[0], entry[1]);
+        form.setValue(entry[0], attributesToArray(entry[1]));
       } else {
         form.setValue(entry[0], entry[1]);
       }
@@ -113,7 +113,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
           {
             name: "composite",
             displayKey: "roles:composite",
-            // cellFormatters: [boolFormatter()],
+            cellFormatters: [boolFormatter()],
           },
           {
             name: "description",

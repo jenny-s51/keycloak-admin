@@ -180,7 +180,7 @@ export const RealmRoleTabs = () => {
         )}
         {!id && (
           <RealmRoleForm
-            reset={() => form.reset()}
+            reset={() => form.reset(role)}
             form={form}
             save={save}
             editMode={false}
