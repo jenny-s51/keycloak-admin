@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useHistory, useParams, useRouteMatch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -30,25 +30,30 @@ export const AssociatedRolesTab = () => {
   const [selectedRole, setSelectedRole] = useState<RoleRepresentation>();
   const [dummyValue, setDummyValue] = useState(0);
 
+  const [compies, setCompies] = useState([] as RoleRepresentation[])
+
 
   const loader = async () => {
     
     const compositeRoles = await adminClient.roles.getCompositeRoles({ id });
+    setCompies(compositeRoles);
     return compositeRoles;
   };
 
-  const returnClients = async () => {
-    const clients = await adminClient.clients.find();
-    return clients;
-  };
+  React.useEffect(() => {
+
+    setTimeout(() => {
+      console.log(compies);
+      loader();
+    }, 5000)
+    
+  }, [dummyValue])
 
   React.useEffect(() => {
 
     console.log("fre$h");
 
   }, [dummyValue])
-
-  console.log("component has rendered")
 
   const RoleDetailLink = (role: RoleRepresentation) => (
     <>
@@ -98,7 +103,7 @@ export const AssociatedRolesTab = () => {
         <DeleteConfirm />
         <KeycloakDataTable
           key={selectedRole ? selectedRole.id : "roleList"}
-          loader={dummyValue != 0 ? loader : returnClients}
+          loader={loader}
           ariaLabelKey="roles:roleList"
           searchPlaceholderKey="roles:searchFor"
           isPaginated
