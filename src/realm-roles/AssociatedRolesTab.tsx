@@ -17,6 +17,7 @@ import { formattedLinkTableCell } from "../components/external-link/FormattedLin
 import { useAlerts } from "../components/alert/Alerts";
 import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
 import { emptyFormatter, toUpperCase } from "../util";
+// import { useEffect } from "@storybook/addons";
 
 export const AssociatedRolesTab = () => {
   const { t } = useTranslation("roles");
@@ -27,11 +28,27 @@ export const AssociatedRolesTab = () => {
   const { id } = useParams<{ id: string }>();
 
   const [selectedRole, setSelectedRole] = useState<RoleRepresentation>();
+  const [dummyValue, setDummyValue] = useState(0);
+
 
   const loader = async () => {
+    
     const compositeRoles = await adminClient.roles.getCompositeRoles({ id });
     return compositeRoles;
   };
+
+  const returnClients = async () => {
+    const clients = await adminClient.clients.find();
+    return clients;
+  };
+
+  React.useEffect(() => {
+
+    console.log("fre$h");
+
+  }, [dummyValue])
+
+  console.log("component has rendered")
 
   const RoleDetailLink = (role: RoleRepresentation) => (
     <>
@@ -67,20 +84,27 @@ export const AssociatedRolesTab = () => {
     },
   });
 
+
+
   const goToCreate = () => history.push(`${url}/add-role`);
+
+  const dumb = () => {
+    setDummyValue(Math.random());
+    console.log(dummyValue);
+  }
   return (
     <>
       <PageSection variant="light">
         <DeleteConfirm />
         <KeycloakDataTable
           key={selectedRole ? selectedRole.id : "roleList"}
-          loader={loader}
+          loader={dummyValue != 0 ? loader : returnClients}
           ariaLabelKey="roles:roleList"
           searchPlaceholderKey="roles:searchFor"
           isPaginated
           toolbarItem={
             <>
-              <Button onClick={goToCreate}>{t("createRole")}</Button>
+              <Button onClick={dumb}>{t("createRole")}</Button>
             </>
           }
           actions={[
@@ -121,6 +145,7 @@ export const AssociatedRolesTab = () => {
           }
         />
       </PageSection>
+      {dummyValue == 0 ? <div>dummyyy is zero</div> : <div>not zero</div>}
     </>
   );
 };

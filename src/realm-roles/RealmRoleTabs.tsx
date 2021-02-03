@@ -65,7 +65,8 @@ export const RealmRoleTabs = () => {
   const [key, setKey] = useState("");
 
   const refresh = () => {
-    console.log("refresh?");
+    
+    console.log("refresh!!");
     setKey(`${new Date().getTime()}`);
   };
 
