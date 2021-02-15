@@ -13,17 +13,11 @@ import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
 import { emptyFormatter, boolFormatter } from "../util";
 
 type RolesListProps = {
-  loader: (
-    first?: number,
-    max?: number,
-    search?: string
-  ) => Promise<RoleRepresentation[]>;
   paginated?: boolean;
   parentRoleId?: string;
 };
 
 export const RolesList = ({
-  loader,
   paginated = true,
   parentRoleId,
 }: RolesListProps) => {
@@ -32,6 +26,17 @@ export const RolesList = ({
   const adminClient = useAdminClient();
   const { addAlert } = useAlerts();
   const { url } = useRouteMatch();
+
+  const loader = async (first?: number, max?: number, search?: string) => {
+    const params: { [name: string]: string | number } = {
+      first: first!,
+      max: max!,
+    };
+    if (search) {
+      params.search = search;
+    }
+    return await adminClient.roles.find({ ...params });
+  };
 
   const [selectedRole, setSelectedRole] = useState<RoleRepresentation>();
 
