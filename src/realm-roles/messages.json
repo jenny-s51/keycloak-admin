@@ -10,6 +10,8 @@
     "title": "Realm roles",
     "addRole": "Add role",
     "createRole": "Create role",
+    "filterByClients": "Filter by clients",
+    "filterByRoles": "Filter by roles",
     "importRole": "Import role",
     "roleID": "Role ID",
     "homeURL": "Home URL",

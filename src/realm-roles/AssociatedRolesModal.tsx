@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Modal, ModalVariant } from "@patternfly/react-core";
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownToggle,
+  Modal,
+  ModalVariant,
+} from "@patternfly/react-core";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { useAdminClient } from "../context/auth/AdminClient";
@@ -8,6 +15,9 @@ import RoleRepresentation from "keycloak-admin/lib/defs/roleRepresentation";
 import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable";
 import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
 import { boolFormatter } from "../util";
+import { CaretDownIcon, FilterIcon } from "@patternfly/react-icons";
+import { ClientRectObject } from "@patternfly/react-core/dist/js/helpers/Popper/thirdparty/popper-core";
+import ClientRepresentation from "keycloak-admin/lib/defs/clientRepresentation";
 
 export type AssociatedRolesModalProps = {
   open: boolean;
@@ -37,6 +47,11 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
   const [name, setName] = useState("");
   const adminClient = useAdminClient();
   const [selectedRows, setSelectedRows] = useState<RoleRepresentation[]>([]);
+  const [clientIdArray, setClientIdArray] = useState<String[]>([]);
+  const [allClientRoles, setAllClientRoles] = useState([]);
+
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [filterType, setFilterType] = useState("roles");
 
   const { id } = useParams<{ id: string }>();
 
@@ -55,17 +70,54 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     });
   };
 
+
+  const clientRolesLoader = async () => {
+    const clients = await adminClient.clients.find();
+    for (const client of Object.values(clients)) {
+
+      setClientIdArray(clientIdArray => [...clientIdArray, client.id!])
+
+    }
+
+    for (const id of clientIdArray) {
+      const clientRolesList = await adminClient.clients.listRoles({ id: id as string });
+
+      
+    }
+
+
+
+    // console.log("these are client roles?", roles)
+    // return roles.sort((r1, r2) => {
+    //   const r1Name = r1.name?.toUpperCase();
+    //   const r2Name = r2.name?.toUpperCase();
+    //   if (r1Name! < r2Name!) {
+    //     return -1;
+    //   }
+    //   if (r1Name! > r2Name!) {
+    //     return 1;
+    //   }
+
+    //   return 0;
+    // });
+  };
+
+  
+
   useEffect(() => {
     (async () => {
       if (id) {
         const fetchedRole = await adminClient.roles.findOneById({ id });
         setName(fetchedRole.name!);
         setupForm(fetchedRole);
+          clientRolesLoader();
+
       } else {
         setName(t("createRole"));
       }
+      // console.log(filterType)
     })();
-  }, []);
+  }, [filterType]);
 
   const setupForm = (role: RoleRepresentation) => {
     Object.entries(role).map((entry) => {
@@ -76,6 +128,21 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
       }
     });
   };
+
+  const onFilterDropdownToggle = () => {
+    setIsFilterDropdownOpen(!isFilterDropdownOpen);
+  };
+
+  const onFilterDropdownSelect = (filterType: string) => {
+    filterType == "roles" ? setFilterType("clients") : "";
+    filterType == "clients" ? setFilterType("roles") : "";
+    setIsFilterDropdownOpen(!isFilterDropdownOpen);
+  };
+
+  console.log("clientIdarray", clientIdArray)
+  console.log("allClientRoles???",clientRolesList)
+
+
 
   return (
     <Modal
@@ -109,9 +176,30 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     >
       <KeycloakDataTable
         key="role-list-modal"
-        loader={loader}
+        loader={filterType == "roles" ? loader : loader}
         ariaLabelKey="roles:roleList"
         searchPlaceholderKey="roles:searchFor"
+        filterToolbarDropdown={
+          <Dropdown
+            onSelect={() => onFilterDropdownSelect(filterType)}
+            toggle={
+              <DropdownToggle
+                id="toggle-id-9"
+                onToggle={onFilterDropdownToggle}
+                toggleIndicator={CaretDownIcon}
+                icon={<FilterIcon />}
+              >
+                Filter by {filterType}
+              </DropdownToggle>
+            }
+            isOpen={isFilterDropdownOpen}
+            dropdownItems={[
+              <DropdownItem key="filter-type">
+                {filterType == "roles" ? t("filterByClients") : t("filterByRoles")}{" "}
+              </DropdownItem>,
+            ]}
+          />
+        }
         canSelectAll
         // isPaginated
         onSelect={(rows) => {
