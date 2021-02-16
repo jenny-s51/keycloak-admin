@@ -123,6 +123,30 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     });
   };
 
+  const getNames = async () => {
+    const containerIdArray = allClientRoles.map((client) => client.containerId);
+    // console.log(containerIdArray);
+    // console.log(containerIdArray[0]);
+
+    let a: ClientRepresentation = {};
+    for (const id of containerIdArray) {
+      const name = await adminClient.clients.findOne({
+        id: id as string,
+      });
+      a = name;
+    }
+
+    console.log("the name", a.clientId)
+
+ 
+    // const names = containerIdArray.map(async (id) => await adminClient.clients.findOne({id: id as string}) );
+    // let x = (Promise.resolve(names).then(() => console.log(names)));
+    // console.log(x)
+
+  };
+
+  getNames();
+
   React.useEffect(() => {
     tableRefresher.current && tableRefresher.current();
   }, [filterType]);
@@ -167,11 +191,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     tableRefresher.current = refresher;
   };
 
-  const getName = async (containerId: string) => {
-    return await adminClient.clients.findOne({
-      id: containerId!,
-    });
-  };
+
 
   // console.log(getName(allClientRoles![0].containerId!))
 
@@ -180,17 +200,17 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
       return <>{name}</>;
     }
     if (filterType == "clients") {
-      const res = getName(containerId!);
+      // const res = getName(containerId!);
       // .then((value) => {
       //   console.log(typeof value.clientId);
       //   return (value.clientId as string)})
 
-      const please = Promise.resolve(
-        res.then(async () => {
-          console.log((await res).clientId);
-          return (await res).clientId;
-        })
-      );
+      // const please = Promise.resolve(
+      //   res.then(async () => {
+      //     console.log((await res).clientId);
+      //     return (await res).clientId;
+      //   })
+      // );
 
       // const theID = res.then((value) => {
       //   console.log(typeof value.clientId);
