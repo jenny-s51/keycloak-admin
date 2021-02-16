@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Button,
@@ -16,8 +16,6 @@ import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable
 import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
 import { boolFormatter } from "../util";
 import { CaretDownIcon, FilterIcon } from "@patternfly/react-icons";
-import { ClientRectObject } from "@patternfly/react-core/dist/js/helpers/Popper/thirdparty/popper-core";
-import ClientRepresentation from "keycloak-admin/lib/defs/clientRepresentation";
 
 export type AssociatedRolesModalProps = {
   open: boolean;
@@ -47,13 +45,31 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
   const [name, setName] = useState("");
   const adminClient = useAdminClient();
   const [selectedRows, setSelectedRows] = useState<RoleRepresentation[]>([]);
-  const [clientIdArray, setClientIdArray] = useState<String[]>([]);
-  const [allClientRoles, setAllClientRoles] = useState([]);
+  // const [clientIdArray, setClientIdArray] = useState<String[]>([]);
+  const [allClientRoles, setAllClientRoles] = useState<RoleRepresentation[]>(
+    []
+  );
 
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [filterType, setFilterType] = useState("roles");
+  const tableRefresher = React.useRef<() => void>();
 
   const { id } = useParams<{ id: string }>();
+
+  const alphabetize = (rolesList: RoleRepresentation[]) => {
+    return rolesList.sort((r1, r2) => {
+      const r1Name = r1.name?.toUpperCase();
+      const r2Name = r2.name?.toUpperCase();
+      if (r1Name! < r2Name!) {
+        return -1;
+      }
+      if (r1Name! > r2Name!) {
+        return 1;
+      }
+
+      return 0;
+    });
+  };
 
   const loader = async () => {
     const allRoles = await adminClient.roles.find();
@@ -61,7 +77,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
       id,
     });
 
-    return allRoles.filter((role: RoleRepresentation) => {
+    return alphabetize(allRoles).filter((role: RoleRepresentation) => {
       return (
         existingAdditionalRoles.find(
           (existing: RoleRepresentation) => existing.name === role.name
@@ -70,39 +86,36 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     });
   };
 
-
   const clientRolesLoader = async () => {
     const clients = await adminClient.clients.find();
-    for (const client of Object.values(clients)) {
 
-      setClientIdArray(clientIdArray => [...clientIdArray, client.id!])
+    const clientIdArray = clients.map((client) => client.id);
 
-    }
-
+    let rolesList: RoleRepresentation[] = [];
     for (const id of clientIdArray) {
-      const clientRolesList = await adminClient.clients.listRoles({ id: id as string });
-
-      
+      const clientRolesList = await adminClient.clients.listRoles({
+        id: id as string,
+      });
+      rolesList = [...rolesList, ...clientRolesList];
     }
+    const existingAdditionalRoles = await adminClient.roles.getCompositeRoles({
+      id,
+    });
 
+    setAllClientRoles(rolesList);
 
-
-    // console.log("these are client roles?", roles)
-    // return roles.sort((r1, r2) => {
-    //   const r1Name = r1.name?.toUpperCase();
-    //   const r2Name = r2.name?.toUpperCase();
-    //   if (r1Name! < r2Name!) {
-    //     return -1;
-    //   }
-    //   if (r1Name! > r2Name!) {
-    //     return 1;
-    //   }
-
-    //   return 0;
-    // });
+    return alphabetize(rolesList).filter((role: RoleRepresentation) => {
+      return (
+        existingAdditionalRoles.find(
+          (existing: RoleRepresentation) => existing.name === role.name
+        ) === undefined && role.name !== name
+      );
+    });
   };
 
-  
+  React.useEffect(() => {
+    tableRefresher.current && tableRefresher.current();
+  }, [filterType]);
 
   useEffect(() => {
     (async () => {
@@ -110,14 +123,11 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
         const fetchedRole = await adminClient.roles.findOneById({ id });
         setName(fetchedRole.name!);
         setupForm(fetchedRole);
-          clientRolesLoader();
-
       } else {
         setName(t("createRole"));
       }
-      // console.log(filterType)
     })();
-  }, [filterType]);
+  }, []);
 
   const setupForm = (role: RoleRepresentation) => {
     Object.entries(role).map((entry) => {
@@ -134,15 +144,18 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
   };
 
   const onFilterDropdownSelect = (filterType: string) => {
-    filterType == "roles" ? setFilterType("clients") : "";
-    filterType == "clients" ? setFilterType("roles") : "";
+    if (filterType == "roles") {
+      setFilterType("clients");
+    }
+    if (filterType == "clients") {
+      setFilterType("roles");
+    }
     setIsFilterDropdownOpen(!isFilterDropdownOpen);
   };
 
-  console.log("clientIdarray", clientIdArray)
-  console.log("allClientRoles???",clientRolesList)
-
-
+  const setRefresher = (refresher: () => void) => {
+    tableRefresher.current = refresher;
+  };
 
   return (
     <Modal
@@ -176,9 +189,10 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     >
       <KeycloakDataTable
         key="role-list-modal"
-        loader={filterType == "roles" ? loader : loader}
+        loader={filterType == "roles" ? loader : clientRolesLoader}
         ariaLabelKey="roles:roleList"
         searchPlaceholderKey="roles:searchFor"
+        setRefresher={setRefresher}
         filterToolbarDropdown={
           <Dropdown
             onSelect={() => onFilterDropdownSelect(filterType)}
@@ -195,7 +209,9 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
             isOpen={isFilterDropdownOpen}
             dropdownItems={[
               <DropdownItem key="filter-type">
-                {filterType == "roles" ? t("filterByClients") : t("filterByRoles")}{" "}
+                {filterType == "roles"
+                  ? t("filterByClients")
+                  : t("filterByRoles")}{" "}
               </DropdownItem>,
             ]}
           />
@@ -211,13 +227,8 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
             displayKey: "roles:roleName",
           },
           {
-            name: "composite",
-            displayKey: "roles:composite",
-            cellFormatters: [boolFormatter()],
-          },
-          {
             name: "description",
-            displayKey: "roles:description",
+            displayKey: "common:description",
           },
         ]}
         emptyState={
