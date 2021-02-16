@@ -5,6 +5,7 @@ import {
   Dropdown,
   DropdownItem,
   DropdownToggle,
+  Label,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
@@ -16,6 +17,7 @@ import { KeycloakDataTable } from "../components/table-toolbar/KeycloakDataTable
 import { ListEmptyState } from "../components/list-empty-state/ListEmptyState";
 import { boolFormatter } from "../util";
 import { CaretDownIcon, FilterIcon } from "@patternfly/react-icons";
+import ClientRepresentation from "keycloak-admin/lib/defs/clientRepresentation";
 
 export type AssociatedRolesModalProps = {
   open: boolean;
@@ -104,6 +106,14 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
 
     setAllClientRoles(rolesList);
 
+    // console.log("rolesList", rolesList);
+    // console.log("oooo", allClientRoles[3].containerId);
+
+    // const test = await adminClient.clients.findOne({
+    //   id: allClientRoles[3]!.containerId!,
+    // });
+    // console.log("the role", test.clientId);
+
     return alphabetize(rolesList).filter((role: RoleRepresentation) => {
       return (
         existingAdditionalRoles.find(
@@ -155,6 +165,55 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
 
   const setRefresher = (refresher: () => void) => {
     tableRefresher.current = refresher;
+  };
+
+  const getName = async (containerId: string) => {
+    return await adminClient.clients.findOne({
+      id: containerId!,
+    });
+  };
+
+  // console.log(getName(allClientRoles![0].containerId!))
+
+  const AliasRenderer = ({ name, containerId }: RoleRepresentation) => {
+    if (filterType == "roles") {
+      return <>{name}</>;
+    }
+    if (filterType == "clients") {
+      const res = getName(containerId!);
+      // .then((value) => {
+      //   console.log(typeof value.clientId);
+      //   return (value.clientId as string)})
+
+      const please = Promise.resolve(
+        res.then(async () => {
+          console.log((await res).clientId);
+          return (await res).clientId;
+        })
+      );
+
+      // const theID = res.then((value) => {
+      //   console.log(typeof value.clientId);
+      //   return (value.clientId as string)})
+      // console.log(Promise.resolve(theID))
+      // console.log("beep", Promise.resolve(beep))
+      // const test = await adminClient.clients.findOne({
+      //   id: containerId!,
+      // });
+      // const id = test.clientId;
+      // console.log(id)
+      // console.log("aaaa",containerId)
+      return (
+        <>
+          {containerId && (
+            <Label color="blue" key={`label-${id}`}>
+              {containerId}
+            </Label>
+          )}{" "}
+          {name}
+        </>
+      );
+    }
   };
 
   return (
@@ -225,6 +284,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
           {
             name: "name",
             displayKey: "roles:roleName",
+            cellRenderer: AliasRenderer,
           },
           {
             name: "description",
