@@ -144,9 +144,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
     // console.log(x)
 
   };
-
-  getNames();
-
+  // getNames();
   React.useEffect(() => {
     tableRefresher.current && tableRefresher.current();
   }, [filterType]);
@@ -192,14 +190,21 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
   };
 
 
+  const convert = async (containerId: string) => {
+    const converted = await adminClient.clients.findOne({id: containerId})
+    console.log(converted.clientId?.toString())
+    return converted.clientId?.toString()
+  };
+
+  console.log(convert("d919e16d-3e6b-43ef-b569-82e29269eec6"));
 
   // console.log(getName(allClientRoles![0].containerId!))
 
-  const AliasRenderer = ({ name, containerId }: RoleRepresentation) => {
-    if (filterType == "roles") {
-      return <>{name}</>;
-    }
-    if (filterType == "clients") {
+  // const AliasRenderer = ({ name, containerId }: RoleRepresentation) => {
+  //   if (filterType == "roles") {
+  //     return <>{name}</>;
+  //   }
+  //   if (filterType == "clients") {
       // const res = getName(containerId!);
       // .then((value) => {
       //   console.log(typeof value.clientId);
@@ -223,18 +228,20 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
       // const id = test.clientId;
       // console.log(id)
       // console.log("aaaa",containerId)
-      return (
-        <>
-          {containerId && (
-            <Label color="blue" key={`label-${id}`}>
-              {containerId}
-            </Label>
-          )}{" "}
-          {name}
-        </>
-      );
-    }
-  };
+  //     return (
+  //       <>
+  //         {containerId && (
+  //           <Label color="blue" key={`label-${id}`}>
+  //             {convert(containerId).toString()}
+  //           </Label>
+  //         )}{" "}
+  //         {name}
+  //       </>
+  //     );
+  //   }
+  // };
+
+  
 
   return (
     <Modal
@@ -304,7 +311,7 @@ export const AssociatedRolesModal = (props: AssociatedRolesModalProps) => {
           {
             name: "name",
             displayKey: "roles:roleName",
-            cellRenderer: AliasRenderer,
+            // cellRenderer: AliasRenderer,
           },
           {
             name: "description",
