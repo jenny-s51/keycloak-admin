@@ -1,9 +1,4 @@
-import React, {
-  FormEvent,
-  Fragment,
-  MouseEventHandler,
-  ReactNode,
-} from "react";
+import React, { FormEvent, Fragment, ReactNode } from "react";
 import {
   Toolbar,
   ToolbarContent,
@@ -13,6 +8,8 @@ import {
   Button,
   ButtonVariant,
   Divider,
+  Chip,
+  ChipGroup,
 } from "@patternfly/react-core";
 import { SearchIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
@@ -20,6 +17,7 @@ import { useTranslation } from "react-i18next";
 type TableToolbarProps = {
   toolbarItem?: ReactNode;
   toolbarItemFooter?: ReactNode;
+  filterChips?: boolean;
   children: ReactNode;
   searchTypeComponent?: ReactNode;
   inputGroupName?: string;
@@ -28,20 +26,86 @@ type TableToolbarProps = {
     newInput: string,
     event: FormEvent<HTMLInputElement>
   ) => void;
-  inputGroupOnClick?: MouseEventHandler;
+  inputGroupOnEnter?: (value: string) => void;
 };
 
 export const TableToolbar = ({
   toolbarItem,
   toolbarItemFooter,
+  filterChips,
   children,
   searchTypeComponent,
   inputGroupName,
   inputGroupPlaceholder,
   inputGroupOnChange,
-  inputGroupOnClick,
+  inputGroupOnEnter,
 }: TableToolbarProps) => {
   const { t } = useTranslation();
+
+  const [searchValue, setSearchValue] = React.useState<string>("");
+  const [searchFilters, setSearchFilters] = React.useState<string[]>([]);
+
+  const onSearch = () => {
+    if (searchValue !== "") {
+      setSearchValue(searchValue);
+      inputGroupOnEnter && inputGroupOnEnter(searchValue);
+    }
+
+    const filterDuplicate = searchFilters.filter(
+      (v, i) => searchFilters.indexOf(v) === i
+    );
+
+    if (!searchFilters.includes(searchValue!) && searchValue !== "") {
+      setSearchFilters([...filterDuplicate, searchValue!]);
+    }
+  };
+
+  const handleKeyDown = (e: any) => {
+    if (e.key === "Enter") {
+      onSearch();
+    }
+  };
+
+  const handleInputChange = (
+    value: string,
+    event: FormEvent<HTMLInputElement>
+  ) => {
+    inputGroupOnChange && inputGroupOnChange(value, event);
+    setSearchValue(value);
+  };
+
+  const handleRemoveItem = (filterName: string) => {
+    setSearchFilters(searchFilters!.filter((item) => item !== filterName));
+    inputGroupOnEnter && inputGroupOnEnter("");
+    setSearchValue(searchValue);
+  };
+
+  const clearAllFilters = () => {
+    inputGroupOnEnter && inputGroupOnEnter("");
+    setSearchValue(searchValue);
+    setSearchFilters([]);
+  };
+
+  const chips = (
+    <>
+      <ChipGroup
+        className="kc-filter-chip-group__table"
+        categoryName={t("roles:roleName")}
+      >
+        {searchFilters!.map((currentChip) => (
+          <Chip key={currentChip} onClick={() => handleRemoveItem(currentChip)}>
+            {currentChip}
+          </Chip>
+        ))}
+      </ChipGroup>
+      {searchFilters!.length > 0 && (
+        <Button variant="link" onClick={() => clearAllFilters()}>
+          {t("roles:clearAllFilters")}
+        </Button>
+      )}
+    </>
+  );
+
   return (
     <>
       <Toolbar>
@@ -59,12 +123,13 @@ export const TableToolbar = ({
                         type="search"
                         aria-label={t("search")}
                         placeholder={inputGroupPlaceholder}
-                        onChange={inputGroupOnChange}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
                       />
                       <Button
                         variant={ButtonVariant.control}
                         aria-label={t("search")}
-                        onClick={inputGroupOnClick}
+                        onClick={onSearch}
                       >
                         <SearchIcon />
                       </Button>
@@ -77,6 +142,7 @@ export const TableToolbar = ({
           {toolbarItem}
         </ToolbarContent>
       </Toolbar>
+      {filterChips && chips}
       <Divider />
       {children}
       <Toolbar>{toolbarItemFooter}</Toolbar>

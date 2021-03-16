@@ -90,6 +90,7 @@ export type DataListProps<T> = {
   actions?: Action<T>[];
   actionResolver?: IActionsResolver;
   searchTypeComponent?: ReactNode;
+  filterChips?: boolean;
   toolbarItem?: ReactNode;
   emptyState?: ReactNode;
 };
@@ -128,6 +129,7 @@ export function KeycloakDataTable<T>({
   actionResolver,
   searchTypeComponent,
   toolbarItem,
+  filterChips,
   emptyState,
 }: DataListProps<T>) {
   const { t } = useTranslation();
@@ -170,32 +172,7 @@ export function KeycloakDataTable<T>({
       },
       handleError
     );
-  }, [key, first, max]);
-
-  const getNodeText = (node: keyof T | JSX.Element): string => {
-    if (["string", "number"].includes(typeof node)) {
-      return node!.toString();
-    }
-    if (node instanceof Array) {
-      return node.map(getNodeText).join("");
-    }
-    if (typeof node === "object" && node) {
-      return getNodeText(node.props.children);
-    }
-    return "";
-  };
-
-  const filter = (search: string) => {
-    setFilteredData(
-      rows!.filter((row) =>
-        row.cells.some(
-          (cell) =>
-            cell &&
-            getNodeText(cell).toLowerCase().includes(search.toLowerCase())
-        )
-      )
-    );
-  };
+  }, [key, first, max, search]);
 
   const convertAction = () =>
     actions &&
@@ -211,13 +188,6 @@ export function KeycloakDataTable<T>({
       };
       return action;
     });
-
-  const searchOnChange = (value: string) => {
-    if (value === "") {
-      refresh();
-    }
-    setSearch(value);
-  };
 
   const Loading = () => (
     <div className="pf-u-text-align-center">
@@ -256,10 +226,10 @@ export function KeycloakDataTable<T>({
           inputGroupName={
             searchPlaceholderKey ? `${ariaLabelKey}input` : undefined
           }
-          inputGroupOnChange={searchOnChange}
-          inputGroupOnClick={refresh}
+          inputGroupOnEnter={setSearch}
           inputGroupPlaceholder={t(searchPlaceholderKey || "")}
           searchTypeComponent={searchTypeComponent}
+          filterChips={filterChips}
           toolbarItem={toolbarItem}
         >
           {!loading && rows.length > 0 && (
@@ -289,10 +259,10 @@ export function KeycloakDataTable<T>({
           inputGroupName={
             searchPlaceholderKey ? `${ariaLabelKey}input` : undefined
           }
-          inputGroupOnChange={searchOnChange}
-          inputGroupOnClick={() => filter(search)}
+          inputGroupOnEnter={setSearch}
           inputGroupPlaceholder={t(searchPlaceholderKey || "")}
           toolbarItem={toolbarItem}
+          filterChips={filterChips}
           searchTypeComponent={searchTypeComponent}
         >
           {!loading && (filteredData || rows).length > 0 && (

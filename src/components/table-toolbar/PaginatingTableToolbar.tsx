@@ -15,6 +15,7 @@ type TableToolbarProps = {
   onPerPageSelect: (max: number, first: number) => void;
   searchTypeComponent?: React.ReactNode;
   toolbarItem?: React.ReactNode;
+  filterChips?: boolean;
   children: React.ReactNode;
   inputGroupName?: string;
   inputGroupPlaceholder?: string;
@@ -22,7 +23,7 @@ type TableToolbarProps = {
     newInput: string,
     event: React.FormEvent<HTMLInputElement>
   ) => void;
-  inputGroupOnClick?: MouseEventHandler;
+  inputGroupOnEnter?: (value: string) => void;
 };
 
 export const PaginatingTableToolbar = ({
@@ -38,7 +39,8 @@ export const PaginatingTableToolbar = ({
   inputGroupName,
   inputGroupPlaceholder,
   inputGroupOnChange,
-  inputGroupOnClick,
+  inputGroupOnEnter,
+  filterChips,
 }: TableToolbarProps) => {
   const page = Math.round(first / max);
   const pagination = (variant: "top" | "bottom" = "top") => (
@@ -70,13 +72,14 @@ export const PaginatingTableToolbar = ({
           )}
         </>
       }
+      filterChips={filterChips}
       toolbarItemFooter={
         count !== 0 && <ToolbarItem>{pagination("bottom")}</ToolbarItem>
       }
       inputGroupName={inputGroupName}
       inputGroupPlaceholder={inputGroupPlaceholder}
       inputGroupOnChange={inputGroupOnChange}
-      inputGroupOnClick={inputGroupOnClick}
+      inputGroupOnEnter={inputGroupOnEnter}
     >
       {children}
     </TableToolbar>

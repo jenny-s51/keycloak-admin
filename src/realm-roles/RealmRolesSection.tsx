@@ -3,6 +3,7 @@ import { PageSection } from "@patternfly/react-core";
 import { ViewHeader } from "../components/view-header/ViewHeader";
 import { useAdminClient } from "../context/auth/AdminClient";
 import { RolesList } from "./RolesList";
+import "./RealmRolesSection.css";
 
 export const RealmRolesSection = () => {
   const adminClient = useAdminClient();
