@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AlertVariant,
   PageSection,
@@ -26,7 +26,17 @@ export const UsersTabs = () => {
   const adminClient = useAdminClient();
   const form = useForm<UserRepresentation>({ mode: "onChange" });
   const { id } = useParams<{ id: string }>();
-  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+
+  useEffect(() => {
+    const update = async () => {
+      if (id) {
+        const fetchedUser = await adminClient.users.findOne({ id });
+        setUser(fetchedUser.username!);
+      }
+    };
+    setTimeout(update, 100);
+  }, []);
 
   const save = async (user: UserRepresentation) => {
     try {
@@ -48,14 +58,6 @@ export const UsersTabs = () => {
     }
   };
 
-  const getId = async () => {
-    const bee = await adminClient.users.find({username: id});
-    console.log(bee[0].id);
-    setUserID(bee[0].id!)
-
-  }
-
-
   return (
     <>
       <ViewHeader titleKey={id! || t("users:createUser")} subKey="" />
@@ -74,7 +76,7 @@ export const UsersTabs = () => {
               data-testid="user-groups-tab"
               title={<TabTitleText>{t("groups")}</TabTitleText>}
             >
-              <UserGroups userID={userID} />
+              <UserGroups userID={user} />
             </Tab>
           </KeycloakTabs>
         )}
