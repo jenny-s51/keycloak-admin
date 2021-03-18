@@ -16,6 +16,7 @@ import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
 import { emptyFormatter } from "../util";
 import { useAdminClient } from "../context/auth/AdminClient";
 import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
+import { JoinGroupsModal } from "./JoinGroupsModal";
 
 export const UserGroups = () => {
   const { t } = useTranslation("roles");
@@ -66,6 +67,12 @@ export const UserGroups = () => {
     <>
       <PageSection variant="light">
         <DeleteConfirm />
+        <JoinGroupsModal
+          // onConfirm={addComposites}
+          // existingCompositeRoles={additionalRoles}
+          open={open}
+          toggleDialog={() => setOpen(!open)}
+        />
         <KeycloakDataTable
           key={key}
           loader={loader}
@@ -120,7 +127,7 @@ export const UserGroups = () => {
               message={t("users:noGroups")}
               instructions={t("users:noGroupsText")}
               primaryActionText={t("users:joinGroup")}
-              onPrimaryAction={() => {}}
+              onPrimaryAction={toggleModal}
             />
           }
         />
