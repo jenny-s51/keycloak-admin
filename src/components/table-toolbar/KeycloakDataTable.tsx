@@ -236,6 +236,9 @@ export function KeycloakDataTable<T>({
     onSelect!(rows!.filter((row) => row.selected).map((row) => row.data));
   };
 
+  console.log(!!emptyState)
+  console.log(rows?.length)
+
   return (
     <>
       {rows && isPaginated && (

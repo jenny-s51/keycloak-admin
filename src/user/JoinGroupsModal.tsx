@@ -72,13 +72,7 @@ export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
   const loader = async () => {
     const allGroups = await adminClient.groups.find();
 
-    return alphabetize(allGroups).filter((group: GroupRepresentation) => {
-      return (
-        allGroups.find(
-          (existing: GroupRepresentation) => existing.name === group.name
-        ) === undefined && group.name !== name
-      );
-    });
+    return alphabetize(allGroups)
   };
 
   // const AliasRenderer = (role: RoleRepresentation) => {
@@ -99,23 +93,9 @@ export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
     refresh();
   }, [filterType]);
 
-  const onFilterDropdownToggle = () => {
-    setIsFilterDropdownOpen(!isFilterDropdownOpen);
-  };
-
-  const onFilterDropdownSelect = (filterType: string) => {
-    if (filterType === "roles") {
-      setFilterType("clients");
-    }
-    if (filterType === "clients") {
-      setFilterType("roles");
-    }
-    setIsFilterDropdownOpen(!isFilterDropdownOpen);
-  };
-
   return (
     <Modal
-      title={t("roles:associatedRolesModalTitle", { name })}
+      title={t("users:joinGroups", { name })}
       isOpen={props.open}
       onClose={props.toggleDialog}
       variant={ModalVariant.large}
@@ -146,35 +126,8 @@ export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
       <KeycloakDataTable
         key={key}
         loader={loader}
-        ariaLabelKey="roles:roleList"
-        searchPlaceholderKey="roles:searchFor"
-        searchTypeComponent={
-          <Dropdown
-            onSelect={() => onFilterDropdownSelect(filterType)}
-            data-testid="filter-type-dropdown"
-            toggle={
-              <DropdownToggle
-                id="toggle-id-9"
-                onToggle={onFilterDropdownToggle}
-                toggleIndicator={CaretDownIcon}
-                icon={<FilterIcon />}
-              >
-                Filter by {filterType}
-              </DropdownToggle>
-            }
-            isOpen={isFilterDropdownOpen}
-            dropdownItems={[
-              <DropdownItem
-                data-testid="filter-type-dropdown-item"
-                key="filter-type"
-              >
-                {filterType === "roles"
-                  ? t("filterByClients")
-                  : t("filterByRoles")}{" "}
-              </DropdownItem>,
-            ]}
-          />
-        }
+        ariaLabelKey="groups:Groups"
+        searchPlaceholderKey="groups:searchGroups"
         canSelectAll
         isPaginated
         onSelect={(rows) => {
@@ -183,12 +136,7 @@ export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
         columns={[
           {
             name: "name",
-            displayKey: "roles:roleName",
             // cellRenderer: AliasRenderer,
-          },
-          {
-            name: "description",
-            displayKey: "common:description",
           },
         ]}
         emptyState={

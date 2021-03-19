@@ -60,7 +60,7 @@ export const UsersTabs = () => {
 
   return (
     <>
-      <ViewHeader titleKey={id! || t("users:createUser")} subKey="" />
+      <ViewHeader titleKey={user! || t("users:createUser")} subKey="" />
       <PageSection variant="light">
         {id && (
           <KeycloakTabs isBox>
@@ -76,7 +76,7 @@ export const UsersTabs = () => {
               data-testid="user-groups-tab"
               title={<TabTitleText>{t("groups")}</TabTitleText>}
             >
-              <UserGroups />
+              <UserGroups username={user} />
             </Tab>
           </KeycloakTabs>
         )}

@@ -10,6 +10,8 @@
     "noGroups": "No groups",
     "noGroupsText": "You haven't added this user to any groups. Join a group to get started.",
     "joinGroup": "Join Group",
+    "joinGroups": "Join groups for user {{name}}",
+    "leave": "Leave",
     "directMembership": "Direct membership",
     "groupMembership": "Group membership",
     "path": "Path",

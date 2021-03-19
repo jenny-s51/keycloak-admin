@@ -18,7 +18,11 @@ import { useAdminClient } from "../context/auth/AdminClient";
 import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
 import { JoinGroupsModal } from "./JoinGroupsModal";
 
-export const UserGroups = () => {
+export type UserFormProps = {
+  username: string;
+};
+
+export const UserGroups = ({username}: UserFormProps) => {
   const { t } = useTranslation("roles");
   const { addAlert } = useAlerts();
   const [key, setKey] = useState(0);
@@ -33,8 +37,11 @@ export const UserGroups = () => {
   const loader = async () => {
     const allGroups = await adminClient.users.listGroups({ id });
 
+    console.log(allGroups)
     return allGroups;
   };
+
+  console.log(id);
 
   useEffect(() => {
     refresh();
@@ -63,6 +70,8 @@ export const UserGroups = () => {
     },
   });
 
+  console.log(username)
+
   return (
     <>
       <PageSection variant="light">
@@ -72,11 +81,12 @@ export const UserGroups = () => {
           // existingCompositeRoles={additionalRoles}
           open={open}
           toggleDialog={() => setOpen(!open)}
+          username={username}
         />
         <KeycloakDataTable
           key={key}
           loader={loader}
-          isPaginated
+          // isPaginated
           ariaLabelKey="roles:roleList"
           searchPlaceholderKey="groups:searchGroup"
           canSelectAll
@@ -91,12 +101,21 @@ export const UserGroups = () => {
                 isChecked={isDirectMembership}
               />
               <Button
-                className="kc-add-role-button"
-                key="add-role-button"
+                className="kc-join-group-button"
+                key="join-group-button"
                 onClick={() => toggleModal()}
-                data-testid="add-role-button"
+                data-testid="join-group-button"
               >
-                {t("addRole")}
+                {t("users:joinGroup")}
+              </Button>
+              <Button
+                className="kc-leave-group-button"
+                key="leave-group-button"
+                onClick={() => toggleModal()}
+                data-testid="join-group-button"
+                variant="link"
+              >
+                {t("users:leave")}
               </Button>
             </>
           }
