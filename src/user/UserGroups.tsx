@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   AlertVariant,
@@ -33,6 +33,8 @@ export const UserGroups = ({username}: UserFormProps) => {
   const { addAlert } = useAlerts();
   const [key, setKey] = useState(0);
   const refresh = () => setKey(new Date().getTime());
+  const history = useHistory();
+
 
   const [selectedRows, setSelectedRows] = useState<RoleRepresentation[]>([]);
   const [isDirectMembership, setDirectMembership] = useState(false);
