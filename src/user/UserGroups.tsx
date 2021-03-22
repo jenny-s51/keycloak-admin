@@ -17,9 +17,15 @@ import { emptyFormatter } from "../util";
 import { useAdminClient } from "../context/auth/AdminClient";
 import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
 import { JoinGroupsModal } from "./JoinGroupsModal";
+import UserRepresentation from "keycloak-admin/lib/defs/userRepresentation";
 
 export type UserFormProps = {
-  username: string;
+  username?: string;
+  loader?: (
+    first?: number,
+    max?: number,
+    search?: string
+  ) => Promise<UserRepresentation[]>;
 };
 
 export const UserGroups = ({username}: UserFormProps) => {
@@ -40,8 +46,6 @@ export const UserGroups = ({username}: UserFormProps) => {
     console.log(allGroups)
     return allGroups;
   };
-
-  console.log(id);
 
   useEffect(() => {
     refresh();
@@ -81,7 +85,7 @@ export const UserGroups = ({username}: UserFormProps) => {
           // existingCompositeRoles={additionalRoles}
           open={open}
           toggleDialog={() => setOpen(!open)}
-          username={username}
+          username={username!}
         />
         <KeycloakDataTable
           key={key}

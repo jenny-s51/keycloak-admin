@@ -84,7 +84,7 @@ export const ClientSettings = ({ save, reset }: ClientSettingsProps) => {
           >
             <MultiLineInput
               name="redirectUris"
-              addButtonLabel="clients:addRedirectUri"
+              // addButtonLabel="clients:addRedirectUri"
             />
           </FormGroup>
           <FormGroup
@@ -118,7 +118,7 @@ export const ClientSettings = ({ save, reset }: ClientSettingsProps) => {
           >
             <MultiLineInput
               name="webOrigins"
-              addButtonLabel="clients:addWebOrigins"
+              // addButtonLabel="clients:addWebOrigins"
             />
           </FormGroup>
           <FormGroup

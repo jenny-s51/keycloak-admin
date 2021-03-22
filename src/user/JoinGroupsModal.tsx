@@ -21,8 +21,7 @@ import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
 export type JoinGroupsModalProps = {
   open: boolean;
   toggleDialog: () => void;
-  // onConfirm: (newReps: RoleRepresentation[]) => void;
-  // existingCompositeRoles: RoleRepresentation[];
+  username: string;
 };
 
 const attributesToArray = (attributes: { [key: string]: string }): any => {
