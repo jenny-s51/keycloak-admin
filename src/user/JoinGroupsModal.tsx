@@ -22,6 +22,7 @@ export type JoinGroupsModalProps = {
   open: boolean;
   toggleDialog: () => void;
   username: string;
+  onConfirm: (newReps: GroupRepresentation[]) => void;
 };
 
 const attributesToArray = (attributes: { [key: string]: string }): any => {
@@ -38,6 +39,7 @@ const attributesToArray = (attributes: { [key: string]: string }): any => {
     value: attributes[key],
   }));
 };
+
 
 export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
   const { t } = useTranslation("roles");
@@ -70,9 +72,20 @@ export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
 
   const loader = async () => {
     const allGroups = await adminClient.groups.find();
+    const existingUserGroups = await adminClient.users.listGroups({id});
 
-    return alphabetize(allGroups)
+    return alphabetize(allGroups).filter((group: GroupRepresentation) => {
+      return (
+        existingUserGroups.find(
+          (existing: GroupRepresentation) => existing.name === group.name
+        ) === undefined && group.name !== name
+      );
+    });
+
   };
+
+  console.log(selectedRows)
+
 
   // const AliasRenderer = (role: RoleRepresentation) => {
   //   return (
@@ -106,7 +119,8 @@ export const JoinGroupsModal = (props: JoinGroupsModalProps) => {
           isDisabled={!selectedRows?.length}
           onClick={() => {
             props.toggleDialog();
-            // props.onConfirm(selectedRows);
+            props.onConfirm(selectedRows);
+            
           }}
         >
           {t("common:add")}

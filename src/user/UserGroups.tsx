@@ -26,9 +26,10 @@ export type UserFormProps = {
     max?: number,
     search?: string
   ) => Promise<UserRepresentation[]>;
+  addGroups?: (newReps: GroupRepresentation[]) => void;
 };
 
-export const UserGroups = ({username}: UserFormProps) => {
+export const UserGroups = ({username, addGroups}: UserFormProps) => {
   const { t } = useTranslation("roles");
   const { addAlert } = useAlerts();
   const [key, setKey] = useState(0);
@@ -81,7 +82,7 @@ export const UserGroups = ({username}: UserFormProps) => {
       <PageSection variant="light">
         <DeleteConfirm />
         <JoinGroupsModal
-          // onConfirm={addComposites}
+          onConfirm={addGroups!}
           // existingCompositeRoles={additionalRoles}
           open={open}
           toggleDialog={() => setOpen(!open)}
