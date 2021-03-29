@@ -38,6 +38,8 @@ export const GroupTable = () => {
   const [selectedRows, setSelectedRows] = useState<GroupRepresentation[]>([]);
   const [move, setMove] = useState<GroupTableData>();
 
+  console.log(move)
+
   const { subGroups } = useSubGroups();
 
   const [key, setKey] = useState(0);

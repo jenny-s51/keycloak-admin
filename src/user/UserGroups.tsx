@@ -18,6 +18,8 @@ import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
 import { cellWidth } from "@patternfly/react-table";
 import { useErrorHandler } from "react-error-boundary";
 import _ from "lodash";
+import { JoinGroupsDialog } from "./JoinGroupsModal";
+import UserRepresentation from "keycloak-admin/lib/defs/userRepresentation";
 
 export const UserGroups = () => {
   const { t } = useTranslation("roles");
@@ -29,10 +31,18 @@ export const UserGroups = () => {
   const [selectedGroup, setSelectedGroup] = useState<GroupRepresentation>();
   const [listGroups, setListGroups] = useState(true);
   const [search, setSearch] = useState("");
+  const [user, setUser] = useState<UserRepresentation>();
   const [username, setUsername] = useState("");
 
   const [isDirectMembership, setDirectMembership] = useState(false);
   const [open, setOpen] = useState(false);
+  const [move, setMove] = useState<GroupTableData>();
+
+
+  type GroupTableData = GroupRepresentation & {
+    membersLength?: number;
+  };
+  
 
   const adminClient = useAdminClient();
   const { id } = useParams<{ id: string }>();
@@ -47,6 +57,7 @@ export const UserGroups = () => {
     };
 
     const user = await adminClient.users.findOne({ id });
+    setUser(user);
     setUsername(user.username!);
 
     const searchParam = search || "";
@@ -92,6 +103,8 @@ export const UserGroups = () => {
     return alphabetize(filterDupesfromGroups);
   };
 
+console.log("user", user);
+
   useEffect(() => {
     return asyncStateFetch(
       () => {
@@ -122,7 +135,9 @@ export const UserGroups = () => {
     );
   };
 
-  const toggleModal = () => setOpen(!open);
+  const toggleModal = () => {
+    setOpen(!open);
+  }
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
     titleKey: t("users:leaveGroup", {
@@ -160,6 +175,35 @@ export const UserGroups = () => {
     <>
       <PageSection variant="light">
         <DeleteConfirm />
+        <JoinGroupsDialog
+          open={open}
+          user={user!}
+          toggleDialog={() => setOpen(!open)}
+          // group={user}
+          onClose={() => setMove(undefined)}
+          onConfirm={async () => {
+            // delete move.membersLength;
+            try {
+              try {
+                // await adminClient.groups.setOrCreateChild({ id }, move);
+              } catch (error) {
+                if (error.response) {
+                  throw error;
+                }
+              }
+              setMove(undefined);
+              refresh();
+              addAlert(t("moveGroupSuccess"), AlertVariant.success);
+            } catch (error) {
+              addAlert(
+                t("moveGroupError", {
+                  error: error.response?.data?.errorMessage || error,
+                }),
+                AlertVariant.danger
+              );
+            }
+          }}
+        />
         <KeycloakDataTable
           key={key}
           loader={loader}
