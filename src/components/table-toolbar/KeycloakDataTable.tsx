@@ -168,7 +168,7 @@ export function KeycloakDataTable<T>({
         return convertToColumns(data);
       },
       (result) => {
-        setRows(result.slice(first, first + max));
+        setRows(result);
         setFilteredData(result);
         setLoading(false);
       },
