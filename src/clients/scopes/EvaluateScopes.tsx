@@ -274,6 +274,8 @@ export const EvaluateScopes = ({ clientId, protocol }: EvaluateScopesProps) => {
           >
             <Split hasGutter>
               <SplitItem isFilled>
+              <div>heyyy</div>
+
                 <Select
                   toggleId="scopeParameter"
                   variant={SelectVariant.typeaheadMulti}

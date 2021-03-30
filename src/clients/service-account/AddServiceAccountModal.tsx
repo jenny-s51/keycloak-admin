@@ -14,6 +14,9 @@ import {
   SelectGroup,
   SelectOption,
   SelectVariant,
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
   ToolbarItem,
 } from "@patternfly/react-core";
 
@@ -200,6 +203,7 @@ export const AddServiceAccountModal = ({
         </Button>,
       ]}
     >
+      <ToolbarGroup>
       <Select
         toggleId="role"
         onToggle={() => setSearchToggle(!searchToggle)}
@@ -245,11 +249,13 @@ export const AddServiceAccountModal = ({
           ))}
         </ChipGroup>
       </ToolbarItem>
+      </ToolbarGroup>
 
       <KeycloakDataTable
         key={key}
         onSelect={(rows) => setSelectedRows([...rows])}
         searchPlaceholderKey="clients:searchByRoleName"
+        // toolbarItem={items}
         canSelectAll={false}
         loader={loader}
         ariaLabelKey="clients:roles"
