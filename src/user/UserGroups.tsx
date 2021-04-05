@@ -18,6 +18,25 @@ import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
 import { cellWidth } from "@patternfly/react-table";
 import { useErrorHandler } from "react-error-boundary";
 import _ from "lodash";
+// import { JoinGroupDialog } from "./JoinGroupDialog";
+import UserRepresentation from "keycloak-admin/lib/defs/userRepresentation";
+// import { MoveGroupDialog } from "../groups/MoveGroupDialog";
+import { getLastId } from "../groups/groupIdUtils";
+import { JoinGroupDialog } from "./JoinGroupDialog";
+
+type GroupTableData = GroupRepresentation & {
+  membersLength?: number;
+};
+
+export type UserFormProps = {
+  username?: string;
+  loader?: (
+    first?: number,
+    max?: number,
+    search?: string
+  ) => Promise<UserRepresentation[]>;
+  addGroups?: (newReps: GroupRepresentation[]) => void;
+};
 
 export const UserGroups = () => {
   const { t } = useTranslation("roles");
@@ -30,9 +49,14 @@ export const UserGroups = () => {
   const [listGroups, setListGroups] = useState(true);
   const [search, setSearch] = useState("");
   const [username, setUsername] = useState("");
+  const [join, setJoin] = useState<GroupTableData>();
+
+  const lastId = getLastId(location.pathname);
+
 
   const [isDirectMembership, setDirectMembership] = useState(true);
   const [open, setOpen] = useState(false);
+  const [move, setMove] = useState<GroupTableData>();
 
   const adminClient = useAdminClient();
   const { id } = useParams<{ id: string }>();
@@ -179,7 +203,27 @@ export const UserGroups = () => {
     );
   };
 
-  const toggleModal = () => setOpen(!open);
+  const JoinGroupButtonRenderer = (group: GroupRepresentation) => {
+    return (
+      <>
+        <Button onClick={() => joinGroup(group)} variant="link">
+          {t("users:joinGroup")}
+        </Button>
+      </>
+    );
+  };
+
+  const toggleModal = () => {
+    setOpen(!open);
+    // setJoin(group);
+  }
+
+  console.log(open)
+
+  const joinGroup = (group: GroupRepresentation) => {
+    setSelectedGroup(group);
+    toggleModal();
+  }
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
     titleKey: t("users:leaveGroup", {
@@ -217,6 +261,37 @@ export const UserGroups = () => {
     <>
       <PageSection variant="light">
         <DeleteConfirm />
+        {open &&
+        <JoinGroupDialog
+          // group={move!}
+          open={open}
+          onClose={() => setOpen(!open)}
+          onConfirm={() => {}}
+          username=""
+          // onClose={() => setMove(undefined)}
+          // onMove={async (id) => {
+          //   delete move!.membersLength;
+          //   try {
+          //     try {
+          //       await adminClient.groups.setOrCreateChild({ id: lastId! }, move!);
+          //     } catch (error) {
+          //       if (error.response) {
+          //         throw error;
+          //       }
+          //     }
+          //     setMove(undefined);
+          //     refresh();
+          //     addAlert(t("moveGroupSuccess"), AlertVariant.success);
+          //   } catch (error) {
+          //     addAlert(
+          //       t("moveGroupError", {
+          //         error: error.response?.data?.errorMessage || error,
+          //       }),
+          //       AlertVariant.danger
+          //     );
+          //   }
+          // }}
+        />}
         <KeycloakDataTable
           key={key}
           loader={loader}
@@ -230,11 +305,12 @@ export const UserGroups = () => {
               <Button
                 className="kc-join-group-button"
                 key="join-group-button"
-                onClick={() => toggleModal()}
+                onClick={toggleModal}
                 data-testid="add-group-button"
               >
                 {t("users:joinGroup")}
               </Button>
+              {JoinGroupButtonRenderer}
               <Checkbox
                 label={t("users:directMembership")}
                 key="direct-membership-check"
