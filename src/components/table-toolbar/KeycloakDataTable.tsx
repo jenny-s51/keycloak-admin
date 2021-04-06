@@ -90,7 +90,6 @@ export type DataListProps<T> = {
   canSelectAll?: boolean;
   isRowDisabled?: (value: T) => boolean;
   isPaginated?: boolean;
-  dataSearch?: boolean;
   ariaLabelKey: string;
   searchPlaceholderKey?: string;
   columns: Field<T>[];
@@ -127,7 +126,6 @@ export function KeycloakDataTable<T>({
   ariaLabelKey,
   searchPlaceholderKey,
   isPaginated = false,
-  dataSearch = false,
   onSelect,
   canSelectAll = false,
   isRowDisabled,
@@ -160,10 +158,10 @@ export function KeycloakDataTable<T>({
       async () => {
         setLoading(true);
 
-        let data = await loader(first, max, search);
+        let data = unPaginatedData || (await loader(first, max, search));
 
-        if (!isPaginated && dataSearch) {
-          setUnPaginatedData(await loader(first, max, search));
+        if (!isPaginated) {
+          setUnPaginatedData(data);
           data = data.slice(first, first + max);
         }
 
@@ -188,7 +186,6 @@ export function KeycloakDataTable<T>({
     if (typeof node === "object" && node) {
       return getNodeText(node.props.children);
     }
-
     return "";
   };
 
@@ -212,12 +209,13 @@ export function KeycloakDataTable<T>({
 
   const filter = (search: string) => {
     setFilteredData(
-      convertToColumns(unPaginatedData!).filter((row) => {
-        row.cells.some((cell) => {
-          cell &&
-            getNodeText(cell).toLowerCase().includes(search.toLowerCase());
-        });
-      })
+      convertToColumns(unPaginatedData!).filter((row) =>
+        row.cells.some(
+          (cell) =>
+            cell &&
+            getNodeText(cell).toLowerCase().includes(search.toLowerCase())
+        )
+      )
     );
     setSearch;
   };
@@ -285,7 +283,7 @@ export function KeycloakDataTable<T>({
             searchPlaceholderKey ? `${ariaLabelKey}input` : undefined
           }
           inputGroupOnEnter={
-            isPaginated || dataSearch ? setSearch : (search) => filter(search)
+            isPaginated ? setSearch : (search) => filter(search)
           }
           inputGroupPlaceholder={t(searchPlaceholderKey || "")}
           searchTypeComponent={searchTypeComponent}
