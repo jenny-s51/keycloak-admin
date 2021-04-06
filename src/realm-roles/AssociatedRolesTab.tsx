@@ -6,6 +6,7 @@ import {
   Button,
   ButtonVariant,
   Checkbox,
+  Label,
   PageSection,
   ToolbarItem,
 } from "@patternfly/react-core";
@@ -20,16 +21,21 @@ import { AssociatedRolesModal } from "./AssociatedRolesModal";
 import { useAdminClient } from "../context/auth/AdminClient";
 import { RoleFormType } from "./RealmRoleTabs";
 import ClientRepresentation from "keycloak-admin/lib/defs/clientRepresentation";
-import { AliasRendererComponent } from "./AliasRendererComponent";
+// import { AliasRendererComponent } from "./AliasRendererComponent";
 import _ from "lodash";
+import { AliasRendererComponent } from "./AliasRendererComponent";
 
 type AssociatedRolesTabProps = {
-  additionalRoles: RoleRepresentation[];
+  additionalRoles: Role[];
   addComposites: (newReps: RoleRepresentation[]) => void;
   parentRole: RoleFormType;
   onRemove: (newReps: RoleRepresentation[]) => void;
   client?: ClientRepresentation;
 };
+
+type Role = RoleRepresentation & {
+  clientId?: string;
+}
 
 export const AssociatedRolesTab = ({
   additionalRoles,
@@ -57,7 +63,7 @@ export const AssociatedRolesTab = ({
   const getSubRoles = async (
     role: RoleRepresentation,
     allRoles: RoleRepresentation[]
-  ): Promise<RoleRepresentation[]> => {
+  ): Promise<Role[]> => {
     // Fetch all composite roles
     const allCompositeRoles = await adminClient.roles.getCompositeRoles({
       id: role.id!,
@@ -86,26 +92,29 @@ export const AssociatedRolesTab = ({
   };
 
   const loader = async () => {
-    const alphabetize = (rolesList: RoleRepresentation[]) => {
+    const alphabetize = (rolesList: Role[]) => {
       return _.sortBy(rolesList, (role) => role.name?.toUpperCase());
     };
+    const clients = await adminClient.clients.find();
+    additionalRoles.filter(role => role.clientRole).map(role => role.clientId = clients.find(client => client.id === role.containerId)!.clientId!);
+
     if (isInheritedHidden) {
       setAllRoles(additionalRoles);
       return alphabetize(additionalRoles);
     }
 
-    const fetchedRoles: Promise<RoleRepresentation[]> = additionalRoles.reduce(
-      async (acc: Promise<RoleRepresentation[]>, role) => {
+    const fetchedRoles: Promise<Role[]> = additionalRoles.reduce(
+      async (acc: Promise<Role[]>, role) => {
         const resolvedRoles = await acc;
         resolvedRoles.push(role);
         const subRoles = await getSubRoles(role, resolvedRoles);
         resolvedRoles.push(...subRoles);
         return acc;
       },
-      Promise.resolve([] as RoleRepresentation[])
+      Promise.resolve([] as Role[])
     );
 
-    return fetchedRoles.then((results: RoleRepresentation[]) => {
+    return fetchedRoles.then((results: Role[]) => {
       const filterDupes = results.filter(
         (thing, index, self) =>
           index === self.findIndex((t) => t.name === thing.name)
@@ -124,15 +133,15 @@ export const AssociatedRolesTab = ({
     return <>{inheritanceMap.current[role.id!]}</>;
   };
 
-  const AliasRenderer = (role: RoleRepresentation) => {
+  const AliasRenderer = ({id, name, clientId}: Role) => {
     return (
       <>
-        <AliasRendererComponent
-          id={id}
-          name={role.name}
-          adminClient={adminClient}
-          containerId={role.containerId}
-        />
+        {clientId && (
+          <Label color="blue" key={`label-${id}`}>
+            {clientId}
+          </Label>
+        )}{" "}
+        {name}
       </>
     );
   };
