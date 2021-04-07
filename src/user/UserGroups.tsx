@@ -35,7 +35,7 @@ export type UserFormProps = {
     max?: number,
     search?: string
   ) => Promise<UserRepresentation[]>;
-  addGroups?: (newReps: GroupRepresentation[]) => void;
+  addGroup?: (newGroup: GroupRepresentation) => void;
 };
 
 export const UserGroups = () => {
@@ -49,10 +49,12 @@ export const UserGroups = () => {
   const [listGroups, setListGroups] = useState(true);
   const [search, setSearch] = useState("");
   const [username, setUsername] = useState("");
+  const [allJoinedGroups, setAllJoinedGroups] = useState<GroupRepresentation[]>(
+    []
+  );
   const [join, setJoin] = useState<GroupTableData>();
 
   const lastId = getLastId(location.pathname);
-
 
   const [isDirectMembership, setDirectMembership] = useState(true);
   const [open, setOpen] = useState(false);
@@ -170,6 +172,8 @@ export const UserGroups = () => {
       return alphabetize(directMembership);
     }
 
+    setAllJoinedGroups(filterDupesfromGroups);
+
     return alphabetize(filterDupesfromGroups);
   };
 
@@ -183,7 +187,7 @@ export const UserGroups = () => {
       },
       handleError
     );
-  });
+  }, []);
 
   useEffect(() => {
     refresh();
@@ -215,15 +219,12 @@ export const UserGroups = () => {
 
   const toggleModal = () => {
     setOpen(!open);
-    // setJoin(group);
-  }
-
-  console.log(open)
+  };
 
   const joinGroup = (group: GroupRepresentation) => {
     setSelectedGroup(group);
     toggleModal();
-  }
+  };
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
     titleKey: t("users:leaveGroup", {
@@ -261,37 +262,17 @@ export const UserGroups = () => {
     <>
       <PageSection variant="light">
         <DeleteConfirm />
-        {open &&
-        <JoinGroupDialog
-          // group={move!}
-          open={open}
-          onClose={() => setOpen(!open)}
-          onConfirm={() => {}}
-          username=""
-          // onClose={() => setMove(undefined)}
-          // onMove={async (id) => {
-          //   delete move!.membersLength;
-          //   try {
-          //     try {
-          //       await adminClient.groups.setOrCreateChild({ id: lastId! }, move!);
-          //     } catch (error) {
-          //       if (error.response) {
-          //         throw error;
-          //       }
-          //     }
-          //     setMove(undefined);
-          //     refresh();
-          //     addAlert(t("moveGroupSuccess"), AlertVariant.success);
-          //   } catch (error) {
-          //     addAlert(
-          //       t("moveGroupError", {
-          //         error: error.response?.data?.errorMessage || error,
-          //       }),
-          //       AlertVariant.danger
-          //     );
-          //   }
-          // }}
-        />}
+        {open && (
+          <JoinGroupDialog
+            group={move!}
+            open={open}
+            onClose={() => setOpen(!open)}
+            onConfirm={async () => {
+              refresh();
+            }}
+            toggleDialog={() => toggleModal()}
+          />
+        )}
         <KeycloakDataTable
           key={key}
           loader={loader}
