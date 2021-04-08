@@ -191,7 +191,7 @@ export const ClientDetails = () => {
   ) => {
     if (await form.trigger()) {
       if (
-        client?.publicClient &&
+        !client?.publicClient &&
         client?.clientAuthenticatorType !==
           form.getValues("clientAuthenticatorType") &&
         !confirmed
@@ -285,7 +285,7 @@ export const ClientDetails = () => {
                 reset={() => setupForm(client)}
               />
             </Tab>
-            {client.publicClient && (
+            {!client.publicClient && (
               <Tab
                 id="credentials"
                 eventKey="credentials"
@@ -312,7 +312,6 @@ export const ClientDetails = () => {
             >
               <Tabs
                 activeKey={activeTab2}
-                isSecondary
                 onSelect={(_, key) => setActiveTab2(key as number)}
               >
                 <Tab
