@@ -43,7 +43,9 @@ export const UserGroups = () => {
   const handleError = useErrorHandler();
 
   const [selectedGroup, setSelectedGroup] = useState<GroupRepresentation>();
+  const [list, setList] = useState(false);
   const [listGroups, setListGroups] = useState(true);
+
   const [search, setSearch] = useState("");
   const [username, setUsername] = useState("");
 
@@ -74,7 +76,7 @@ export const UserGroups = () => {
       setSearch(searchParam);
     }
 
-    if (!searchParam && !listGroups) {
+    if (!searchParam && !listGroups && !list) {
       return [];
     }
 
@@ -267,6 +269,7 @@ export const UserGroups = () => {
         id: id,
         groupId: newGroup.id!,
       });
+      setList(true);
       refresh();
       addAlert(t("users:addedGroupMembership"), AlertVariant.success);
     } catch (error) {
@@ -287,6 +290,7 @@ export const UserGroups = () => {
             onClose={() => setOpen(!open)}
             onConfirm={addGroup}
             toggleDialog={() => toggleModal()}
+            username={username}
           />
         )}
         <KeycloakDataTable
@@ -345,8 +349,8 @@ export const UserGroups = () => {
                 hasIcon={true}
                 message={t("users:noGroups")}
                 instructions={t("users:noGroupsText")}
-                primaryActionText={t("users:joinGroup")}
-                onPrimaryAction={() => {}}
+                // primaryActionText={t("users:joinGroup")}
+                // onPrimaryAction={toggleModal}
               />
             ) : (
               ""
