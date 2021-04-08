@@ -342,6 +342,7 @@ export const UserGroups = () => {
               cellFormatters: [emptyFormatter()],
               transforms: [cellWidth(45)],
             },
+
             {
               name: "",
               cellRenderer: LeaveButtonRenderer,

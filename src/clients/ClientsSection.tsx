@@ -144,7 +144,7 @@ export const ClientsSection = () => {
               columns={[
                 {
                   name: "clientId",
-                  displayKey: "clients:clientID",
+                  displayKey: "common:clientId",
                   cellRenderer: ClientDetailLink,
                 },
                 { name: "protocol", displayKey: "common:type" },
