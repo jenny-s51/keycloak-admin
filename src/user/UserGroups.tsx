@@ -57,6 +57,9 @@ export const UserGroups = () => {
   const lastId = getLastId(location.pathname);
 
   const [isDirectMembership, setDirectMembership] = useState(true);
+  const [directMembershipList, setDirectMembershipList] = useState<
+    GroupRepresentation[]
+  >([]);
   const [open, setOpen] = useState(false);
   const [move, setMove] = useState<GroupTableData>();
 
@@ -163,6 +166,7 @@ export const UserGroups = () => {
       (value) => !topLevelGroups.includes(value)
     );
 
+    setDirectMembershipList(directMembership);
     const filterDupesfromGroups = allPaths.filter(
       (thing, index, self) =>
         index === self.findIndex((t) => t.name === thing.name)
@@ -195,16 +199,6 @@ export const UserGroups = () => {
 
   const AliasRenderer = (group: GroupRepresentation) => {
     return <>{group.name}</>;
-  };
-
-  const LeaveButtonRenderer = (group: GroupRepresentation) => {
-    return (
-      <>
-        <Button onClick={() => leave(group)} variant="link">
-          {t("users:Leave")}
-        </Button>
-      </>
-    );
   };
 
   const JoinGroupButtonRenderer = (group: GroupRepresentation) => {
@@ -258,6 +252,41 @@ export const UserGroups = () => {
     toggleDeleteDialog();
   };
 
+  const LeaveButtonRenderer = (group: GroupRepresentation) => {
+    if (
+      directMembershipList.some((item) => item.id === group.id) ||
+      directMembershipList.length === 0
+    ) {
+      return (
+        <>
+          <Button onClick={() => leave(group)} variant="link">
+            {t("users:Leave")}
+          </Button>
+        </>
+      );
+    } else {
+      return <> </>;
+    }
+  };
+
+  const addGroup = async (group: GroupRepresentation): Promise<void> => {
+    const newGroup = group;
+
+    try {
+      await adminClient.users.addToGroup({
+        id: id,
+        groupId: newGroup.id!,
+      });
+      refresh();
+      addAlert(t("users:addedGroupMembership"), AlertVariant.success);
+    } catch (error) {
+      addAlert(
+        t("users:addedGroupMembershipError", { error }),
+        AlertVariant.danger
+      );
+    }
+  };
+
   return (
     <>
       <PageSection variant="light">
@@ -267,9 +296,7 @@ export const UserGroups = () => {
             group={move!}
             open={open}
             onClose={() => setOpen(!open)}
-            onConfirm={async () => {
-              refresh();
-            }}
+            onConfirm={addGroup}
             toggleDialog={() => toggleModal()}
           />
         )}
