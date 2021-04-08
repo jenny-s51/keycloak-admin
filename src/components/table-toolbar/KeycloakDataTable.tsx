@@ -243,25 +243,50 @@ export function KeycloakDataTable<T>({
 
   const _onSelect = (isSelected: boolean, rowIndex: number) => {
     if (rowIndex === -1) {
+      // filter roles
       setRows(
         rows!.map((row) => {
           row.selected = isSelected;
           return row;
         })
       );
+      console.log("rows", rows)
     } else {
-      rows![rowIndex].selected = isSelected;
+      console.log(`======== FilterdData: ${filteredData!.length}`);
+      console.log(`======== Rows: ${rows!.length}`);
+      if (filteredData) {
+        const foundRow = rows!.find((row) => row.data === filteredData[rowIndex].data);
+        filteredData[rowIndex].selected = isSelected;
+        console.log(`------ Found ---------`);
+        console.dir(foundRow);
+        if (foundRow) {
+          foundRow.selected = isSelected;
+        }
+      } else {
+        rows![rowIndex].selected = isSelected;
+      }
+      console.log("rows", rows)
+      console.log(selected)
       setRows([...rows!]);
     }
+
+    // Keeps selected items when paginating
     const difference = _.differenceBy(
       selected,
       rows!.map((row) => row.data),
       "id"
     );
+
+    console.log(difference)
+    // Selected rows are any rows previously selected from a different page, plus current page selections
     const selectedRows = [
       ...difference,
       ...rows!.filter((row) => row.selected).map((row) => row.data),
     ];
+
+    console.log(`========Selected: ${selected.length}`)
+    console.log(`========difference: ${difference.length}`)
+    console.log(`========SelectedRows: ${selectedRows.length}`)
     setSelected(selectedRows);
     onSelect!(selectedRows);
   };
