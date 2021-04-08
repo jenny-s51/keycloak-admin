@@ -18,10 +18,7 @@ import GroupRepresentation from "keycloak-admin/lib/defs/groupRepresentation";
 import { cellWidth } from "@patternfly/react-table";
 import { useErrorHandler } from "react-error-boundary";
 import _ from "lodash";
-// import { JoinGroupDialog } from "./JoinGroupDialog";
 import UserRepresentation from "keycloak-admin/lib/defs/userRepresentation";
-// import { MoveGroupDialog } from "../groups/MoveGroupDialog";
-import { getLastId } from "../groups/groupIdUtils";
 import { JoinGroupDialog } from "./JoinGroupDialog";
 
 type GroupTableData = GroupRepresentation & {
@@ -49,19 +46,12 @@ export const UserGroups = () => {
   const [listGroups, setListGroups] = useState(true);
   const [search, setSearch] = useState("");
   const [username, setUsername] = useState("");
-  const [allJoinedGroups, setAllJoinedGroups] = useState<GroupRepresentation[]>(
-    []
-  );
-  const [join, setJoin] = useState<GroupTableData>();
-
-  const lastId = getLastId(location.pathname);
 
   const [isDirectMembership, setDirectMembership] = useState(true);
   const [directMembershipList, setDirectMembershipList] = useState<
     GroupRepresentation[]
   >([]);
   const [open, setOpen] = useState(false);
-  const [move, setMove] = useState<GroupTableData>();
 
   const adminClient = useAdminClient();
   const { id } = useParams<{ id: string }>();
@@ -167,6 +157,7 @@ export const UserGroups = () => {
     );
 
     setDirectMembershipList(directMembership);
+
     const filterDupesfromGroups = allPaths.filter(
       (thing, index, self) =>
         index === self.findIndex((t) => t.name === thing.name)
@@ -175,8 +166,6 @@ export const UserGroups = () => {
     if (isDirectMembership) {
       return alphabetize(directMembership);
     }
-
-    setAllJoinedGroups(filterDupesfromGroups);
 
     return alphabetize(filterDupesfromGroups);
   };
@@ -255,7 +244,8 @@ export const UserGroups = () => {
   const LeaveButtonRenderer = (group: GroupRepresentation) => {
     if (
       directMembershipList.some((item) => item.id === group.id) ||
-      directMembershipList.length === 0
+      directMembershipList.length === 0 ||
+      isDirectMembership
     ) {
       return (
         <>
@@ -293,7 +283,6 @@ export const UserGroups = () => {
         <DeleteConfirm />
         {open && (
           <JoinGroupDialog
-            group={move!}
             open={open}
             onClose={() => setOpen(!open)}
             onConfirm={addGroup}
