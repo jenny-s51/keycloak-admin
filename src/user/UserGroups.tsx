@@ -349,8 +349,6 @@ export const UserGroups = () => {
                 hasIcon={true}
                 message={t("users:noGroups")}
                 instructions={t("users:noGroupsText")}
-                // primaryActionText={t("users:joinGroup")}
-                // onPrimaryAction={toggleModal}
               />
             ) : (
               ""
