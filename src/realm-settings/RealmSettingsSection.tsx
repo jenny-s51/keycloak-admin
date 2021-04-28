@@ -164,6 +164,22 @@ export const RealmSettingsSection = () => {
     setTimeout(update, 100);
   }, []);
 
+  useEffect(() => {
+    const update = async () => {
+      const keysMetaData = await adminClient.realms.getKeys({
+        realm: realmName,
+      });
+      setKeys(keysMetaData.keys!);
+      console.log("keyyyyy", keys);
+      const realmComponents = await adminClient.components.find({
+        type: "org.keycloak.keys.KeyProvider",
+        realm: realmName,
+      });
+      setRealmComponents(realmComponents);
+    };
+    setTimeout(update, 100);
+  }, []);
+
   const setupForm = (realm: RealmRepresentation) => {
     Object.entries(realm).map((entry) => setValue(entry[0], entry[1]));
   };

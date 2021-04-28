@@ -35,6 +35,7 @@ article.pf-c-card.pf-m-flat.kc-email-connection
   padding-left: 0px;
   padding-bottom: var(--pf-global--spacer--2xl);
 }
+<<<<<<< HEAD
 
 button#kc-certificate.pf-c-button.pf-m-secondary {
   margin-left: var(--pf-global--spacer--md);
@@ -68,3 +69,5 @@ button.pf-c-button.pf-m-link.add-provider {
   display: flex;
   align-items: start;
 }
+=======
+>>>>>>> wip keys
