@@ -32,7 +32,6 @@
     "password": "Password",
     "keys": "Keys",
     "keysList": "Keys list",
-<<<<<<< HEAD
     "searchKey":"Search key",
     "providers": "Providers",
     "algorithm": "Algorithm",
@@ -42,13 +41,6 @@
     "provider": "Provider",
     "providerDescription": "Provider description",
     "addProvider": "Add provider",
-=======
-    "providers": "Providers",
-    "algorithm": "Algorithm",
-    "type": "Type",
-    "kid": "Kid",
-    "provider": "Provider",
->>>>>>> wip keys
     "publicKeys": "Public keys",
     "certificate": "Certificate",
     "userRegistration": "User registration",
