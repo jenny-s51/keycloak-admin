@@ -128,9 +128,12 @@ export const KeysTab = ({ keys, realmComponents }: KeysTabProps) => {
   }, [keys]);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> wip providers table
+=======
+>>>>>>> wip key providers
   const [togglePublicKeyDialog, PublicKeyDialog] = useConfirmDialog({
     titleKey: t("realm-settings:publicKeys").slice(0, -1),
     messageKey: publicKey,
@@ -220,7 +223,11 @@ export const KeysTab = ({ keys, realmComponents }: KeysTabProps) => {
     } else if (type === "RSA") {
       return (
         <>
+<<<<<<< HEAD
           <div className="button-wrapper">
+=======
+          <div>
+>>>>>>> wip key providers
             <Button
               onClick={() => {
                 togglePublicKeyDialog();
@@ -242,6 +249,7 @@ export const KeysTab = ({ keys, realmComponents }: KeysTabProps) => {
               {t("realm-settings:certificate")}
             </Button>
           </div>
+<<<<<<< HEAD
 =======
     } else if (name === "rsa-generated" || name === "fallback-RS256") {
       return (
@@ -253,6 +261,8 @@ export const KeysTab = ({ keys, realmComponents }: KeysTabProps) => {
             {t("realm-settings:certificate")}
           </Button>
 >>>>>>> wip providers table
+=======
+>>>>>>> wip key providers
         </>
       );
     }
@@ -376,12 +386,17 @@ type KeysProps = {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 export const KeysListTab = ({ keys, realmComponents, ...props }: KeysProps) => {
 =======
 
+=======
+>>>>>>> wip key providers
 export const KeysListTab = ({ keys, realmComponents, ...props }: KeysProps) => {
-    console.log("components", realmComponents)
-    console.log(realmComponents.forEach((component) => console.log(component.name)))
+  console.log("components", realmComponents);
+  console.log(
+    realmComponents.forEach((component) => console.log(component.name))
+  );
 
 >>>>>>> wip providers table
   return (

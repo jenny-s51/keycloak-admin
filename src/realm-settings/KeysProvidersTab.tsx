@@ -169,6 +169,12 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
                   <DataListCell className="provider-description" key={"3"}>
                     <>{t("realm-settings:providerDescription")}</>
                   </DataListCell>,
+                  <DataListCell key={"2"}>
+                    <>{t("realm-settings:provider")}</>
+                  </DataListCell>,
+                  <DataListCell key={"3"}>
+                    <>{t("realm-settings:providerDescription")}</>
+                  </DataListCell>
                 ]}
               />
             </DataListItemRow>
@@ -212,9 +218,12 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
             </DataListItem>
           ))}
         </DataList>
+<<<<<<< HEAD
         <div className="pf-screen-reader" aria-live="assertive">
           {liveText}
         </div>
+=======
+>>>>>>> wip key providers
       </PageSection>
     </>
   );

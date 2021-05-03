@@ -27,16 +27,10 @@ import { PartialImportDialog } from "./PartialImport";
 import { RealmSettingsThemesTab } from "./ThemesTab";
 import { RealmSettingsEmailTab } from "./EmailTab";
 import { KeysListTab } from "./KeysListTab";
-<<<<<<< HEAD
 import type { KeyMetadataRepresentation } from "keycloak-admin/lib/defs/keyMetadataRepresentation";
 import type ComponentRepresentation from "keycloak-admin/lib/defs/componentRepresentation";
 import { KeysProviderTab } from "./KeysProvidersTab";
 import { useServerInfo } from "../context/server-info/ServerInfoProvider";
-=======
-import { KeyMetadataRepresentation } from "keycloak-admin/lib/defs/keyMetadataRepresentation";
-import ComponentRepresentation from "keycloak-admin/lib/defs/componentRepresentation";
-import { KeysProviderTab } from "./KeysProvidersTab";
->>>>>>> rebase
 
 type RealmSettingsHeaderProps = {
   onChange: (value: boolean) => void;
@@ -276,15 +270,11 @@ export const RealmSettingsSection = () => {
                   eventKey={1}
                   title={<TabTitleText>{t("providers")}</TabTitleText>}
                 >
-<<<<<<< HEAD
                   <KeysProviderTab
                     components={realmComponents}
                     realmComponents={realmComponents}
                     keyProviderComponentTypes={kpComponentTypes}
                   />
-=======
-                  {/* <KeysProviderTab /> */}
->>>>>>> rebase
                 </Tab>
               </Tabs>
             </Tab>
