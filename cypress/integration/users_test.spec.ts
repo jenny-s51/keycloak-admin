@@ -162,6 +162,7 @@ describe("Users test", () => {
       masthead.checkNotificationMessage("The user has been deleted");
 
       listingPage.itemExist(itemId, false);
+      cy.wait(200)
     });
   });
 });
