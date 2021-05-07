@@ -40,7 +40,6 @@ describe("Group test", () => {
       masthead.checkNotificationMessage("Group created");
 
       sidebarPage.goToGroups();
-      listingPage.searchItem(groupName, false).itemExist(groupName);
 
       // Delete
       listingPage.deleteItem(groupName);
@@ -60,7 +59,6 @@ describe("Group test", () => {
       masthead.checkNotificationMessage("Group updated");
 
       sidebarPage.goToGroups();
-      listingPage.searchItem(newName, false).itemExist(newName);
       listingPage.deleteItem(newName);
     });
 

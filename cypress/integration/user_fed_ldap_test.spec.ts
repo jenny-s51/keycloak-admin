@@ -14,7 +14,7 @@ const modalUtils = new ModalUtils();
 const provider = "ldap";
 const allCapProvider = provider.toUpperCase();
 
-const firstLdapName = "my-ldap";
+const firstLdapName = "-my-ldap";
 const firstLdapVendor = "Active Directory";
 
 const connectionUrl = "ldap://";
@@ -28,7 +28,7 @@ const firstRdnLdapAtt = "uid";
 const firstUuidLdapAtt = "entryUUID";
 const firstUserObjClasses = "inetOrgPerson, organizationalPerson";
 
-const secondLdapName = `${firstLdapName}-2`;
+const secondLdapName = `ldap-${firstLdapName}-2`;
 const secondLdapVendor = "Other";
 
 const secondBindType = "none";

@@ -5,7 +5,9 @@ export default class GroupModal {
   private renameButton = "renameGroup";
 
   open(name?: string) {
-    cy.getId(name || this.openButton).click();
+    // cy.getId(name || this.openButton).click();
+    cy.get(`[data-testid=${name || this.openButton}]`).click();
+
     return this;
   }
 
