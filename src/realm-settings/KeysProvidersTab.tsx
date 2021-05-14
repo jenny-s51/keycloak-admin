@@ -11,9 +11,16 @@ import {
   DataListItemCells,
   DataListItemRow,
   Dropdown,
+  DropdownItem,
   DropdownToggle,
+  FormGroup,
   InputGroup,
+  ModalVariant,
   PageSection,
+  Select,
+  SelectOption,
+  SelectVariant,
+  Switch,
   TextInput,
   Toolbar,
   ToolbarGroup,
@@ -25,6 +32,10 @@ import type ComponentRepresentation from "keycloak-admin/lib/defs/componentRepre
 import "./RealmSettingsSection.css";
 import type ComponentTypeRepresentation from "keycloak-admin/lib/defs/componentTypeRepresentation";
 import { SearchIcon } from "@patternfly/react-icons";
+import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
+import { Controller } from "react-hook-form";
+import { HelpItem } from "../components/help-enabler/HelpItem";
+import { FormAccess } from "../components/form-access/FormAccess";
 
 type ComponentData = KeyMetadataRepresentation & {
   providerDescription?: string;
@@ -46,9 +57,22 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
     []
   );
 
+  const serverInfo = useServerInfo();
+  const providerTypes = serverInfo.componentTypes![
+    "org.keycloak.keys.KeyProvider"
+  ].map((item) => item.id);
+
+  const allComponentTypes = serverInfo.componentTypes![
+    "org.keycloak.keys.KeyProvider"
+  ];
+
   const itemIds = components.map((item, idx) => "data" + idx);
 
   const [itemOrder, setItemOrder] = useState<string[]>([]);
+  const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
+  const [defaultConsoleDisplayName, setDefaultConsoleDisplayName] = useState(
+    ""
+  );
 
   const [liveText, setLiveText] = useState("");
 
@@ -97,8 +121,268 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
     setSearchVal(value);
   };
 
+  const [toggleAddProviderModal, AddProviderModal] = useConfirmDialog({
+    titleKey: t("realm-settings:addProvider"),
+    // messageKey: "common:add",
+    variant: ModalVariant.medium,
+    continueButtonLabel: "common:add",
+    continueButtonVariant: ButtonVariant.primary,
+    children: (
+      <>
+        <FormAccess
+          isHorizontal
+          role="manage-realm"
+          className="pf-u-mt-lg"
+          // onSubmit={handleSubmit(save)}
+        >
+          <FormGroup
+            label={t("realm-settings:consoleDisplayName")}
+            fieldId="kc-login-theme"
+            labelIcon={
+              <HelpItem
+                helpText="realm-settings-help:loginTheme"
+                forLabel={t("loginTheme")}
+                forID="kc-login-theme"
+              />
+            }
+          >
+            <Controller
+              name="name"
+              // control={control}
+              defaultValue=""
+              render={({ onChange, value }) => (
+                <TextInput
+                  // variant={SelectVariant.single}
+                  aria-label={t("consoleDisplayName")}
+                  // isOpen={loginThemeOpen}
+                  defaultValue={defaultConsoleDisplayName}
+                  data-testid="select-display-name"
+                ></TextInput>
+              )}
+            />
+          </FormGroup>
+          <FormGroup
+            label={t("common:enabled")}
+            fieldId="kc-account-theme"
+            labelIcon={
+              <HelpItem
+                helpText="realm-settings-help:accountTheme"
+                forLabel={t("accountTheme")}
+                forID="kc-account-theme"
+              />
+            }
+          >
+            <Controller
+              name="internationalizationEnabled"
+              // control={control}
+              defaultValue={false}
+              render={({ onChange, value }) => (
+                <Switch
+                  id="kc-internationalization"
+                  label={t("common:enabled")}
+                  labelOff={t("common:disabled")}
+                  isChecked={value}
+                  data-testid={
+                    value
+                      ? "internationalization-enabled"
+                      : "internationalization-disabled"
+                  }
+                  onChange={onChange}
+                />
+              )}
+            />
+          </FormGroup>
+          <FormGroup
+            label={t("realm-settings:active")}
+            fieldId="kc-admin-console-theme"
+            labelIcon={
+              <HelpItem
+                helpText="realm-settings-help:adminConsoleTheme"
+                forLabel={t("adminTheme")}
+                forID="kc-admin-console-theme"
+              />
+            }
+          >
+            <Controller
+              name="internationalizationEnabled"
+              // control={control}
+              defaultValue={false}
+              render={({ onChange, value }) => (
+                <Switch
+                  id="kc-internationalization"
+                  label={t("common:enabled")}
+                  labelOff={t("common:disabled")}
+                  isChecked={value}
+                  data-testid={
+                    value
+                      ? "internationalization-enabled"
+                      : "internationalization-disabled"
+                  }
+                  onChange={onChange}
+                />
+              )}
+            />
+          </FormGroup>
+          {defaultConsoleDisplayName === ("rsa" || "rsa-generated") && (
+            <FormGroup
+              label={t("realm-settings:algorithm")}
+              fieldId="kc-algorithm"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:emailTheme"
+                  forLabel={t("emailTheme")}
+                  forID="kc-email-theme"
+                />
+              }
+            >
+              <Controller
+                name="emailTheme"
+                // control={control}
+                defaultValue=""
+                render={({ onChange, value }) => (
+                  <Select
+                    toggleId="kc-email-theme"
+                    onToggle={() => {}}
+                    onSelect={(_, value) => {
+                      onChange(value as string);
+                      // setEmailThemeOpen(false);
+                    }}
+                    selections={value}
+                    variant={SelectVariant.single}
+                    aria-label={t("emailTheme")}
+                    // isOpen={emailThemeOpen}
+                    // placeholderText="Select a theme"
+                    data-testid="select-email-theme"
+                  >
+                    {/* {themeTypes.email.map((theme, idx) => (
+                    <SelectOption
+                      selected={theme.name === value}
+                      key={`email-theme-${idx}`}
+                      value={theme.name}
+                    >
+                      {t(`${theme.name}`)}
+                    </SelectOption>
+                  ))} */}
+                  </Select>
+                )}
+              />
+            </FormGroup>
+          )}
+
+          {defaultConsoleDisplayName === "aes-generated" && (
+            <FormGroup
+              label={t("realm-settings:AESKeySize")}
+              fieldId="kc-algorithm"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:emailTheme"
+                  forLabel={t("emailTheme")}
+                  forID="kc-email-theme"
+                />
+              }
+            >
+              <Controller
+                name="emailTheme"
+                // control={control}
+                defaultValue=""
+                render={({ onChange, value }) => (
+                  <Select
+                    toggleId="kc-email-theme"
+                    onToggle={() => {}}
+                    onSelect={(_, value) => {
+                      onChange(value as string);
+                      // setEmailThemeOpen(false);
+                    }}
+                    selections={value}
+                    variant={SelectVariant.single}
+                    aria-label={t("emailTheme")}
+                    // isOpen={emailThemeOpen}
+                    placeholderText="Select one..."
+                    data-testid="select-email-theme"
+                  >
+                    {/* {themeTypes.email.map((theme, idx) => (
+                    <SelectOption
+                      selected={theme.name === value}
+                      key={`email-theme-${idx}`}
+                      value={theme.name}
+                    >
+                      {t(`${theme.name}`)}
+                    </SelectOption>
+                  ))} */}
+                  </Select>
+                )}
+              />
+            </FormGroup>
+          )}
+          {defaultConsoleDisplayName === "ecdsa-generated" && (
+            <FormGroup
+              label={t("realm-settings:ellipticCurve")}
+              fieldId="kc-algorithm"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:emailTheme"
+                  forLabel={t("emailTheme")}
+                  forID="kc-email-theme"
+                />
+              }
+            >
+              <Controller
+                name="ecdsaEllipticCurveKey"
+                // control={control}
+                defaultValue=""
+                render={({ onChange, value }) => (
+                  <Select
+                    toggleId="kc-elliptic"
+                    onToggle={() => {}}
+                    onSelect={(_, value) => {
+                      onChange(value as string);
+                      // setEmailThemeOpen(false);
+                    }}
+                    selections={value}
+                    variant={SelectVariant.single}
+                    aria-label={t("emailTheme")}
+                    isOpen={true}
+                    placeholderText="Select one..."
+                    data-testid="select-email-theme"
+                  >
+                    {allComponentTypes.map((p, idx) => (
+                    <SelectOption
+                      selected={p === value}
+                      key={`email-theme-${idx}`}
+                      value={p.properties[3].options}
+                    >
+                      {t(`${p.properties[3].options}`)}
+                    </SelectOption>
+                  ))}
+                  </Select>
+                )}
+              />
+            </FormGroup>
+          )}
+        </FormAccess>
+      </>
+    ),
+    onConfirm: async () => {
+      try {
+        // for (const scope of selectedScopes) {
+        //   await adminClient.clientScopes.del({ id: scope.id! });
+        // }
+        // addAlert(t("deletedSuccess"), AlertVariant.success);
+        // refresh();
+      } catch (error) {
+        // addAlert(
+        //   t("deleteError", {
+        //     error: error.response?.data?.errorMessage || error,
+        //   }),
+        //   AlertVariant.danger
+        // );
+      }
+    },
+  });
+
   return (
     <>
+      <AddProviderModal />
       <PageSection variant="light" padding={{ default: "noPadding" }}>
         <Toolbar>
           <>
@@ -126,12 +410,30 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
                 <Dropdown
                   data-testid="addProviderDropdown"
                   className="add-provider-dropdown"
-                  onSelect={() => {}}
+                  // onClick={() => toggleAddProviderModal()}
+                  isOpen={providerDropdownOpen}
                   toggle={
-                    <DropdownToggle isPrimary>
+                    <DropdownToggle
+                      onToggle={(val) => setProviderDropdownOpen(val)}
+                      isPrimary
+                    >
                       {t("realm-settings:addProvider")}
                     </DropdownToggle>
                   }
+                  dropdownItems={[
+                    providerTypes.map((item) => (
+                      <DropdownItem
+                        onClick={() => {
+                          toggleAddProviderModal();
+                          setProviderDropdownOpen(false);
+                          setDefaultConsoleDisplayName(item);
+                        }}
+                        key={item}
+                      >
+                        {item}
+                      </DropdownItem>
+                    )),
+                  ]}
                 />
               </ToolbarItem>
             </ToolbarGroup>
