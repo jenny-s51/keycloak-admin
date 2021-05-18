@@ -34,6 +34,7 @@ export interface ConfirmDialogModalProps extends ConfirmDialogProps {
 
 export type ConfirmDialogProps = {
   titleKey: string;
+  className?: string;
   messageKey?: string;
   noCancelButton?: boolean;
   cancelButtonLabel?: string;
@@ -47,6 +48,7 @@ export type ConfirmDialogProps = {
 
 export const ConfirmDialogModal = ({
   titleKey,
+  className,
   messageKey,
   noCancelButton,
   cancelButtonLabel,
@@ -62,6 +64,7 @@ export const ConfirmDialogModal = ({
   const { t } = useTranslation();
   return (
     <Modal
+      className={className}
       title={t(titleKey)}
       isOpen={open}
       onClose={toggleDialog}

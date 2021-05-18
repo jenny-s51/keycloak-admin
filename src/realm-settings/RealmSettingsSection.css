@@ -70,6 +70,7 @@ button.pf-c-button.pf-m-link.add-provider {
   padding-left: var(--pf-c-toolbar__content--PaddingLeft);
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 .pf-c-form__group-label {
   display: flex;
@@ -85,3 +86,15 @@ button.pf-c-button.pf-m-link.add-provider {
 >>>>>>> wip key providers
 =======
 >>>>>>> add providers and search functionality
+=======
+
+.pf-c-modal-box.add-provider-modal.pf-m-md {
+  max-height: calc(100vh - 225px);
+}
+
+.pf-c-modal-box__body {
+  overflow: visible;
+  /* height: calc(70vh - 225px); */
+
+}
+>>>>>>> add provider wip
