@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import {
   AlertVariant,
   Button,
@@ -24,24 +24,25 @@ import ComponentRepresentation from "keycloak-admin/lib/defs/componentRepresenta
 import { FormAccess } from "../components/form-access/FormAccess";
 import { HelpItem } from "../components/help-enabler/HelpItem";
 import { useServerInfo } from "../context/server-info/ServerInfoProvider";
-
-
+import { useRealm } from "../context/realm-context/RealmContext";
 
 type AddProviderModalProps = {
   id?: string;
   providerType?: string;
   handleModalToggle?: () => void;
   refresh?: () => void;
-  save?: () => void;
+  open: boolean;
+  // save?: () => void;
 };
 
 export const AddProviderModal = ({
   id,
   providerType,
   handleModalToggle,
-  refresh,
-  save,
-}: AddProviderModalProps) => {
+  open,
+}: // refresh,
+// save,
+AddProviderModalProps) => {
   const { t } = useTranslation("groups");
   const serverInfo = useServerInfo();
   const adminClient = useAdminClient();
@@ -50,52 +51,63 @@ export const AddProviderModal = ({
     // defaultValues: { name: rename },
   });
   const [isKeySizeDropdownOpen, setIsKeySizeDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [
+    isEllipticCurveDropdownOpen,
+    setIsEllipticCurveDropdownOpen,
+  ] = useState(false);
+
+  // const [isModalOpen, setIsModalOpen] = useState(true);
+  const [displayName, setDisplayName] = useState("");
+  const realm = useRealm();
 
   const providerTypes = serverInfo.componentTypes![
     "org.keycloak.keys.KeyProvider"
   ].map((item) => item.id);
-  
+
   const allComponentTypes = serverInfo.componentTypes![
     "org.keycloak.keys.KeyProvider"
   ];
+  const [key, setKey] = useState(0);
+  const refresh = () => setKey(new Date().getTime());
 
+  useEffect(() => {
+    console.log("refreshed");
+  }, [key]);
 
-//   const handleModalToggle = () => {
-//     setIsModalOpen(!isModalOpen);
-//   };
+  const [AESkeySize, setAESkeySize] = useState<string[]>(["16"]);
+  console.log("coooomponent", allComponentTypes);
 
-const [AESkeySize, setAESkeySize] = useState("");
-
-  const submitForm = async (component: ComponentRepresentation) => {
-    console.log("viz")
-
+  const save = async (component: ComponentRepresentation) => {
     try {
-    //   if (!id) {
-        await adminClient.components.create(component);
-    //   } else if (rename) {
-    //     await adminClient.groups.update({ id }, group);
-    //   } else {
-    //     await adminClient.groups.setOrCreateChild({ id }, group);
-    //   }
-
-    //   refresh(rename ? group : undefined);
+      await adminClient.components.create({
+        parentId: realm.realm,
+        name: displayName !== "" ? displayName : providerType,
+        providerId: providerType,
+        providerType: "org.keycloak.keys.KeyProvider",
+        ...component,
+      });
       refresh();
+      addAlert(t("realm-settings:saveProviderSuccess"), AlertVariant.success);
       handleModalToggle!();
-      addAlert(
-        t("created!!!!"),
-        AlertVariant.success
-      );
     } catch (error) {
-      addAlert(t("couldNotCreate", { error }), AlertVariant.danger);
+      console.log("iooops", error.response.data.errorMessage)
+      addAlert(
+        t("realm-settings:saveProviderError") + error.response?.data?.errorMessage || error,
+        // , {
+        //   error: error.response?.data?.errorMessage || error,
+        // }),
+        AlertVariant.danger
+      );
     }
   };
+
+  console.log("troy", allComponentTypes[0].properties[3].options[1]);
 
   return (
     <Modal
       variant={ModalVariant.medium}
       title={t("realm-settings:addProvider")}
-      isOpen={true}
+      isOpen={open}
       onClose={handleModalToggle}
       actions={[
         <Button
@@ -104,7 +116,7 @@ const [AESkeySize, setAESkeySize] = useState("");
           variant="primary"
           type="submit"
           form="add-provider"
-        //   onClick={() => submitForm}
+          // onClick={() => handleModalToggle!()}
         >
           {t("common:Add")}
         </Button>,
@@ -120,133 +132,143 @@ const [AESkeySize, setAESkeySize] = useState("");
         </Button>,
       ]}
     >
-       <Form
-          isHorizontal
+      <Form
+        isHorizontal
         //   role="manage-realm"
-          id="add-provider"
-          className="pf-u-mt-lg"
-          onSubmit={handleSubmit(save)}
+        id="add-provider"
+        className="pf-u-mt-lg"
+        onSubmit={handleSubmit(save!)}
+      >
+        <FormGroup
+          label={t("realm-settings:consoleDisplayName")}
+          fieldId="kc-login-theme"
+          labelIcon={
+            <HelpItem
+              helpText="realm-settings-help:loginTheme"
+              forLabel={t("loginTheme")}
+              forID="kc-login-theme"
+            />
+          }
         >
+          <Controller
+            name="name"
+            control={control}
+            defaultValue={providerType}
+            render={({ onChange, value }) => (
+              <TextInput
+                // variant={SelectVariant.single}
+                aria-label={t("consoleDisplayName")}
+                // isOpen={loginThemeOpen}
+                defaultValue={providerType}
+                onChange={(value) => {
+                  onChange(value);
+                  console.log("good day in my mind", displayName);
+                  console.log("value", value);
+                  setDisplayName(value);
+                }}
+                data-testid="select-display-name"
+              ></TextInput>
+            )}
+          />
+        </FormGroup>
+        <FormGroup
+          label={t("common:enabled")}
+          fieldId="kc-account-theme"
+          labelIcon={
+            <HelpItem
+              helpText="realm-settings-help:accountTheme"
+              forLabel={t("accountTheme")}
+              forID="kc-account-theme"
+            />
+          }
+        >
+          <Controller
+            name="config.enabled"
+            control={control}
+            defaultValue={["true"]}
+            render={({ onChange, value }) => (
+              <Switch
+                id="kc-enabled"
+                label={t("common:enabled")}
+                labelOff={t("common:disabled")}
+                isChecked={value[0] === "true"}
+                data-testid={
+                  value[0] === "true"
+                    ? "internationalization-enabled"
+                    : "internationalization-disabled"
+                }
+                onChange={(value) => {
+                  onChange([value + ""]);
+                }}
+              />
+            )}
+          />
+        </FormGroup>
+        <FormGroup
+          label={t("realm-settings:active")}
+          fieldId="kc-admin-console-theme"
+          labelIcon={
+            <HelpItem
+              helpText="realm-settings-help:adminConsoleTheme"
+              forLabel={t("adminTheme")}
+              forID="kc-admin-console-theme"
+            />
+          }
+        >
+          <Controller
+            name="config.active"
+            control={control}
+            defaultValue={["true"]}
+            render={({ onChange, value }) => (
+              <Switch
+                id="kc-active"
+                label={t("common:enabled")}
+                labelOff={t("common:disabled")}
+                isChecked={value[0] === "true"}
+                data-testid={
+                  value[0] === "true"
+                    ? "internationalization-enabled"
+                    : "internationalization-disabled"
+                }
+                onChange={(value) => {
+                  onChange([value + ""]);
+                }}
+              />
+            )}
+          />
+        </FormGroup>
+        {providerType === ("rsa" || "rsa-generated") && (
           <FormGroup
-            label={t("realm-settings:consoleDisplayName")}
-            fieldId="kc-login-theme"
+            label={t("realm-settings:algorithm")}
+            fieldId="kc-algorithm"
             labelIcon={
               <HelpItem
-                helpText="realm-settings-help:loginTheme"
-                forLabel={t("loginTheme")}
-                forID="kc-login-theme"
+                helpText="realm-settings-help:algorithm"
+                forLabel={t("algorithm")}
+                forID="kc-algorithm"
               />
             }
           >
             <Controller
-              name="name"
-              control={control}
-              defaultValue={providerType}
+              name="algorithm"
+              // control={control}
+              defaultValue=""
               render={({ onChange, value }) => (
-                <TextInput
-                  // variant={SelectVariant.single}
-                  aria-label={t("consoleDisplayName")}
-                  // isOpen={loginThemeOpen}
-                  defaultValue={providerType}
-                  data-testid="select-display-name"
-                ></TextInput>
-              )}
-            />
-          </FormGroup>
-          <FormGroup
-            label={t("common:enabled")}
-            fieldId="kc-account-theme"
-            labelIcon={
-              <HelpItem
-                helpText="realm-settings-help:accountTheme"
-                forLabel={t("accountTheme")}
-                forID="kc-account-theme"
-              />
-            }
-          >
-            <Controller
-              name="config.enabled"
-              control={control}
-              defaultValue={false}
-              render={({ onChange, value }) => (
-                <Switch
-                  id="kc-enabled"
-                  label={t("common:enabled")}
-                  labelOff={t("common:disabled")}
-                  isChecked={value}
-                  data-testid={
-                    value
-                      ? "internationalization-enabled"
-                      : "internationalization-disabled"
-                  }
-                  onChange={(onChange)}
-                />
-              )}
-            />
-          </FormGroup>
-          <FormGroup
-            label={t("realm-settings:active")}
-            fieldId="kc-admin-console-theme"
-            labelIcon={
-              <HelpItem
-                helpText="realm-settings-help:adminConsoleTheme"
-                forLabel={t("adminTheme")}
-                forID="kc-admin-console-theme"
-              />
-            }
-          >
-             <Controller
-              name="config.active"
-              control={control}
-              defaultValue={false}
-              render={({ onChange, value }) => (
-                <Switch
-                  id="kc-active"
-                  label={t("common:enabled")}
-                  labelOff={t("common:disabled")}
-                  isChecked={value}
-                  data-testid={
-                    value
-                      ? "internationalization-enabled"
-                      : "internationalization-disabled"
-                  }
-                  onChange={onChange}
-                />
-              )}
-            />
-          </FormGroup>
-          {providerType === ("rsa" || "rsa-generated") && (
-            <FormGroup
-              label={t("realm-settings:algorithm")}
-              fieldId="kc-algorithm"
-              labelIcon={
-                <HelpItem
-                  helpText="realm-settings-help:emailTheme"
-                  forLabel={t("emailTheme")}
-                  forID="kc-email-theme"
-                />
-              }
-            >
-              <Controller
-                name="emailTheme"
-                // control={control}
-                defaultValue=""
-                render={({ onChange, value }) => (
-                  <Select
-                    toggleId="kc-email-theme"
-                    onToggle={() => {}}
-                    onSelect={(_, value) => {
-                      onChange(value as string);
-                      // setEmailThemeOpen(false);
-                    }}
-                    selections={value}
-                    variant={SelectVariant.single}
-                    aria-label={t("emailTheme")}
-                    // isOpen={emailThemeOpen}
-                    // placeholderText="Select a theme"
-                    data-testid="select-email-theme"
-                  >
-                    {/* {themeTypes.email.map((theme, idx) => (
+                <Select
+                  toggleId="kc-email-theme"
+                  onToggle={() => {}}
+                  onSelect={(_, value) => {
+                    onChange(value as string);
+                    // setEmailThemeOpen(false);
+                  }}
+                  selections={value}
+                  variant={SelectVariant.single}
+                  aria-label={t("algorithm")}
+                  // isOpen={emailThemeOpen}
+                  // placeholderText="Select a theme"
+                  data-testid="select-algorithm"
+                >
+                  {/* {themeTypes.email.map((theme, idx) => (
                     <SelectOption
                       selected={theme.name === value}
                       key={`email-theme-${idx}`}
@@ -255,15 +277,109 @@ const [AESkeySize, setAESkeySize] = useState("");
                       {t(`${theme.name}`)}
                     </SelectOption>
                   ))} */}
-                  </Select>
-                )}
-              />
-            </FormGroup>
-          )}
+                </Select>
+              )}
+            />
+          </FormGroup>
+        )}
 
-          {providerType === "aes-generated" && (
+        {providerType === "aes-generated" && (
+          <FormGroup
+            label={t("realm-settings:AESKeySize")}
+            fieldId="kc-aes-keysize"
+            // labelIcon={
+            //   <HelpItem
+            //     helpText="realm-settings-help:emailTheme"
+            //     forLabel={t("emailTheme")}
+            //     forID="kc-email-theme"
+            //   />
+            // }
+          >
+            <Controller
+              name="config.secretSize"
+              control={control}
+              defaultValue={["16"]}
+              render={({ onChange, value }) => (
+                <Select
+                  toggleId="kc-aes-keysize"
+                  onToggle={() =>
+                    setIsKeySizeDropdownOpen(!isKeySizeDropdownOpen)
+                  }
+                  onSelect={(_, value) => {
+                    onChange([value + ""]);
+                    setAESkeySize([value + ""]);
+                    setIsKeySizeDropdownOpen(false);
+                  }}
+                  selections={AESkeySize}
+                  isOpen={isKeySizeDropdownOpen}
+                  variant={SelectVariant.single}
+                  aria-label={t("aesKeySize")}
+                  // placeholderText="Select one..."
+                  data-testid="select-secret-size"
+                >
+                  {allComponentTypes[0].properties[3].options!.map(
+                    (item, idx) => (
+                      <SelectOption
+                        selected={item === value}
+                        key={`email-theme-${idx}`}
+                        value={item}
+                      />
+                    )
+                  )}
+                </Select>
+              )}
+            />
+          </FormGroup>
+        )}
+        {providerType === "ecdsa-generated" && (
+          <FormGroup
+            label={t("realm-settings:ellipticCurve")}
+            fieldId="kc-algorithm"
+            labelIcon={
+              <HelpItem
+                helpText="realm-settings-help:emailTheme"
+                forLabel={t("emailTheme")}
+                forID="kc-email-theme"
+              />
+            }
+          >
+            <Controller
+              name="config.ecdsaEllipticCurveKey"
+              control={control}
+              defaultValue={["P-256"]}
+              render={({ onChange, value }) => (
+                <Select
+                  toggleId="kc-elliptic"
+                  onToggle={() =>
+                    setIsEllipticCurveDropdownOpen(!isEllipticCurveDropdownOpen)
+                  }
+                  onSelect={(_, value) => {
+                    onChange([value + ""]);
+                    setIsEllipticCurveDropdownOpen(false);
+                  }}
+                  selections={[value + ""]}
+                  variant={SelectVariant.single}
+                  aria-label={t("emailTheme")}
+                  isOpen={isEllipticCurveDropdownOpen}
+                  placeholderText="Select one..."
+                  data-testid="select-email-theme"
+                >
+                  {allComponentTypes[1].properties[3].options!.map((p, idx) => (
+                    <SelectOption
+                      selected={p === value}
+                      key={`email-theme-${idx}`}
+                      value={p}
+                    ></SelectOption>
+                  ))}
+                </Select>
+              )}
+            />
+          </FormGroup>
+        )}
+        {providerType === "hmac-generated" && (
+          <>
             <FormGroup
-              label={t("realm-settings:AESKeySize")}
+              label={t("realm-settings:secretSize")}
               fieldId="kc-aes-keysize"
               // labelIcon={
               //   <HelpItem
@@ -276,7 +392,7 @@ const [AESkeySize, setAESkeySize] = useState("");
               <Controller
                 name="config.secretSize"
                 control={control}
-                defaultValue=""
+                defaultValue={["64"]}
                 render={({ onChange, value }) => (
                   <Select
                     toggleId="kc-aes-keysize"
@@ -284,18 +400,18 @@ const [AESkeySize, setAESkeySize] = useState("");
                       setIsKeySizeDropdownOpen(!isKeySizeDropdownOpen)
                     }
                     onSelect={(_, value) => {
-                      onChange(value as string);
-                      setAESkeySize(value as string);
+                      onChange([value + ""]);
+                      setAESkeySize([value + ""]);
                       setIsKeySizeDropdownOpen(false);
                     }}
-                    selections={AESkeySize}
+                    selections={[value + ""]}
                     isOpen={isKeySizeDropdownOpen}
                     variant={SelectVariant.single}
                     aria-label={t("aesKeySize")}
-                    placeholderText="Select one..."
+                    // placeholderText="Select one..."
                     data-testid="select-secret-size"
                   >
-                    {allComponentTypes[0].properties[3].options!.map(
+                    {allComponentTypes[2].properties[3].options!.map(
                       (item, idx) => (
                         <SelectOption
                           selected={item === value}
@@ -308,10 +424,8 @@ const [AESkeySize, setAESkeySize] = useState("");
                 )}
               />
             </FormGroup>
-          )}
-          {providerType === "ecdsa-generated" && (
             <FormGroup
-              label={t("realm-settings:ellipticCurve")}
+              label={t("realm-settings:algorithm")}
               fieldId="kc-algorithm"
               labelIcon={
                 <HelpItem
@@ -322,39 +436,223 @@ const [AESkeySize, setAESkeySize] = useState("");
               }
             >
               <Controller
-                name="ecdsaEllipticCurveKey"
+                name="config.algorithm"
                 control={control}
-                defaultValue=""
+                defaultValue={["HS-256"]}
                 render={({ onChange, value }) => (
                   <Select
                     toggleId="kc-elliptic"
-                    onToggle={() => {}}
+                    onToggle={() =>
+                      setIsEllipticCurveDropdownOpen(
+                        !isEllipticCurveDropdownOpen
+                      )
+                    }
                     onSelect={(_, value) => {
-                      onChange(value as string);
-                      // setEmailThemeOpen(false);
+                      onChange([value + ""]);
+                      setIsEllipticCurveDropdownOpen(false);
                     }}
-                    selections={value}
+                    selections={[value + ""]}
                     variant={SelectVariant.single}
                     aria-label={t("emailTheme")}
-                    isOpen={true}
+                    isOpen={isEllipticCurveDropdownOpen}
                     placeholderText="Select one..."
                     data-testid="select-email-theme"
                   >
-                    {allComponentTypes[1].properties[3].options!.map((p, idx) => (
-                      <SelectOption
-                        selected={p === value}
-                        key={`email-theme-${idx}`}
-                        value={p}
-                      >
-
-                      </SelectOption>
-                    ))}
+                    {allComponentTypes[2].properties[4].options!.map(
+                      (p, idx) => (
+                        <SelectOption
+                          selected={p === value}
+                          key={`email-theme-${idx}`}
+                          value={p}
+                        ></SelectOption>
+                      )
+                    )}
                   </Select>
                 )}
               />
             </FormGroup>
-          )}
-        </Form>
+          </>
+        )}
+        {providerType === "java-keystore" && (
+          <>
+            <FormGroup
+              label={t("realm-settings:algorithm")}
+              fieldId="kc-algorithm"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:algorithm"
+                  forLabel={t("algorithm")}
+                  forID="kc-email-theme"
+                />
+              }
+            >
+              <Controller
+                name="config.algorithm"
+                control={control}
+                defaultValue={["RS256"]}
+                render={({ onChange, value }) => (
+                  <Select
+                    toggleId="kc-elliptic"
+                    onToggle={() =>
+                      setIsEllipticCurveDropdownOpen(
+                        !isEllipticCurveDropdownOpen
+                      )
+                    }
+                    onSelect={(_, value) => {
+                      onChange([value + ""]);
+                      setIsEllipticCurveDropdownOpen(false);
+                    }}
+                    selections={[value + ""]}
+                    variant={SelectVariant.single}
+                    aria-label={t("algorithm")}
+                    isOpen={isEllipticCurveDropdownOpen}
+                    placeholderText="Select one..."
+                    data-testid="select-algorithm"
+                  >
+                    {allComponentTypes[3].properties[3].options!.map(
+                      (p, idx) => (
+                        <SelectOption
+                          selected={p === value}
+                          key={`algorithm-${idx}`}
+                          value={p}
+                        ></SelectOption>
+                      )
+                    )}
+                  </Select>
+                )}
+              />
+            </FormGroup>
+            <FormGroup
+              label={t("realm-settings:keystore")}
+              fieldId="kc-login-theme"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:loginTheme"
+                  forLabel={t("loginTheme")}
+                  forID="kc-login-theme"
+                />
+              }
+            >
+              <Controller
+                name="config.keystore"
+                control={control}
+                defaultValue={[]}
+                render={({ onChange, value }) => (
+                  <TextInput
+                    // variant={SelectVariant.single}
+                    aria-label={t("keystore")}
+                    // isOpen={loginThemeOpen}
+                    // defaultValue={[]}
+                    onChange={(value) => {
+                      onChange([value + ""]);
+                      console.log("good day in my mind", displayName);
+                      console.log("value", value);
+                      // setDisplayName(value);
+                    }}
+                    data-testid="select-display-name"
+                  ></TextInput>
+                )}
+              />
+            </FormGroup>
+            <FormGroup
+              label={t("realm-settings:keystorePassword")}
+              fieldId="kc-login-theme"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:loginTheme"
+                  forLabel={t("loginTheme")}
+                  forID="kc-login-theme"
+                />
+              }
+            >
+              <Controller
+                name="config.keystorePassword"
+                control={control}
+                defaultValue={[]}
+                render={({ onChange, value }) => (
+                  <TextInput
+                    // variant={SelectVariant.single}
+                    aria-label={t("consoleDisplayName")}
+                    // isOpen={loginThemeOpen}
+                    // defaultValue=""
+                    onChange={(value) => {
+                      onChange([value + ""]);
+                      console.log("good day in my mind", displayName);
+                      console.log("value", value);
+                      setDisplayName(value);
+                    }}
+                    data-testid="select-display-name"
+                  ></TextInput>
+                )}
+              />
+            </FormGroup>
+            <FormGroup
+              label={t("realm-settings:keyAlias")}
+              fieldId="kc-login-theme"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:loginTheme"
+                  forLabel={t("loginTheme")}
+                  forID="kc-login-theme"
+                />
+              }
+            >
+              <Controller
+                name="config.keyAlias"
+                control={control}
+                defaultValue={[]}
+                render={({ onChange, value }) => (
+                  <TextInput
+                    // variant={SelectVariant.single}
+                    aria-label={t("consoleDisplayName")}
+                    // isOpen={loginThemeOpen}
+                    // defaultValue=""
+                    onChange={(value) => {
+                      onChange([value + ""]);
+                      console.log("good day in my mind", displayName);
+                      console.log("value", value);
+                      // setDisplayName(value);
+                    }}
+                    data-testid="select-display-name"
+                  ></TextInput>
+                )}
+              />
+            </FormGroup>
+            <FormGroup
+              label={t("realm-settings:keyPassword")}
+              fieldId="kc-login-theme"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:loginTheme"
+                  forLabel={t("loginTheme")}
+                  forID="kc-login-theme"
+                />
+              }
+            >
+              <Controller
+                name="config.keyPassword"
+                control={control}
+                defaultValue={[]}
+                render={({ onChange, value }) => (
+                  <TextInput
+                    // variant={SelectVariant.single}
+                    aria-label={t("consoleDisplayName")}
+                    // isOpen={loginThemeOpen}
+                    // defaultValue=""
+                    onChange={(value) => {
+                      onChange([value + ""]);
+                      console.log("good day in my mind", displayName);
+                      console.log("value", value);
+                      setDisplayName(value);
+                    }}
+                    data-testid="select-display-name"
+                  ></TextInput>
+                )}
+              />
+            </FormGroup>
+          </>
+        )}
+      </Form>
     </Modal>
   );
 };
