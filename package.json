@@ -34,7 +34,7 @@
     "react-dom": "^16.8.5",
     "react-error-boundary": "^3.1.1",
     "react-hook-form": "^6.8.3",
-    "react-i18next": "^11.7.0",
+    "react-i18next": "^11.8.15",
     "react-router-dom": "^5.2.0",
     "use-react-router-breadcrumbs": "^1.0.5"
   },
