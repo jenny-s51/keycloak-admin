@@ -53,6 +53,7 @@
     "privateRSAKey": "Private RSA Key",
     "x509Certificate": "X509 Certificate",
     "ellipticCurve": "Elliptic Curve",
+    "secretSize": "Secret size",
     "type": "Type",
     "name": "Name",
     "kid": "Kid",

@@ -131,6 +131,7 @@ export const RealmSettingsSection = () => {
   const { control, getValues, setValue } = form;
   const [realm, setRealm] = useState<RealmRepresentation>();
   const [activeTab2, setActiveTab2] = useState(0);
+  const [key, setKey] = useState(0);
   const [keys, setKeys] = useState<KeyMetadataRepresentation[]>([]);
   const [realmComponents, setRealmComponents] = useState<
     ComponentRepresentation[]
@@ -148,6 +149,10 @@ export const RealmSettingsSection = () => {
     },
     []
   );
+  const refresh = () => {
+    console.log("refershhshs");
+    setKey(new Date().getTime());
+  };
 
   useEffect(() => {
     const update = async () => {
@@ -178,7 +183,7 @@ export const RealmSettingsSection = () => {
       setRealmComponents(realmComponents);
     };
     setTimeout(update, 100);
-  }, []);
+  }, [key]);
 
   const setupForm = (realm: RealmRepresentation) => {
     Object.entries(realm).map((entry) => setValue(entry[0], entry[1]));
@@ -272,6 +277,7 @@ export const RealmSettingsSection = () => {
                 >
                   <KeysProviderTab
                     components={realmComponents}
+                    refresh={refresh}
                     realmComponents={realmComponents}
                     keyProviderComponentTypes={kpComponentTypes}
                   />

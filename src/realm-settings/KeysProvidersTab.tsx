@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  AlertVariant,
   Button,
   ButtonVariant,
   DataList,
@@ -14,14 +13,8 @@ import {
   Dropdown,
   DropdownItem,
   DropdownToggle,
-  FormGroup,
   InputGroup,
-  ModalVariant,
   PageSection,
-  Select,
-  SelectOption,
-  SelectVariant,
-  Switch,
   TextInput,
   Toolbar,
   ToolbarGroup,
@@ -33,15 +26,7 @@ import type ComponentRepresentation from "keycloak-admin/lib/defs/componentRepre
 import "./RealmSettingsSection.css";
 import type ComponentTypeRepresentation from "keycloak-admin/lib/defs/componentTypeRepresentation";
 import { SearchIcon } from "@patternfly/react-icons";
-import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
-import { Controller, useForm } from "react-hook-form";
-import { HelpItem } from "../components/help-enabler/HelpItem";
-import { FormAccess } from "../components/form-access/FormAccess";
-import { useAdminClient } from "../context/auth/AdminClient";
-import { useAlerts } from "../components/alert/Alerts";
 import { AddProviderModal } from "./AddProviderModal";
-import { getLastId } from "../groups/groupIdUtils";
-import { useRealm } from "../context/realm-context/RealmContext";
 
 type ComponentData = KeyMetadataRepresentation & {
   providerDescription?: string;
@@ -52,15 +37,14 @@ type KeysTabInnerProps = {
   components: ComponentData[];
   realmComponents: ComponentRepresentation[];
   keyProviderComponentTypes: ComponentTypeRepresentation[];
+  refresh: () => void;
 };
 
-export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
+export const KeysTabInner = ({ components, refresh }: KeysTabInnerProps) => {
   const { t } = useTranslation("roles");
-  const realm = useRealm();
 
   const [id, setId] = useState("");
   const [searchVal, setSearchVal] = useState("");
-  const [val, setVal] = useState("");
   const [filteredComponents, setFilteredComponents] = useState<ComponentData[]>(
     []
   );
@@ -71,25 +55,10 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
     "org.keycloak.keys.KeyProvider"
   ].map((item) => item.id);
 
-  const allComponentTypes = serverInfo.componentTypes![
-    "org.keycloak.keys.KeyProvider"
-  ];
-
-  console.log("new light", allComponentTypes);
-  const adminClient = useAdminClient();
-
-  const [key, setKey] = useState(0);
-  const refresh = () => setKey(new Date().getTime());
-
-  // let beep = allComponentTypes[0].properties[3].options!
-  const { register, errors, setValue, control, handleSubmit } = useForm();
-  const { addAlert } = useAlerts();
-
   const itemIds = components.map((item, idx) => "data" + idx);
 
   const [itemOrder, setItemOrder] = useState<string[]>([]);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
-  const [isKeySizeDropdownOpen, setIsKeySizeDropdownOpen] = useState(false);
 
   const [defaultConsoleDisplayName, setDefaultConsoleDisplayName] = useState(
     ""
@@ -99,7 +68,7 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
 
   useEffect(() => {
     setItemOrder(["data", ...itemIds]);
-  }, [components, searchVal, key]);
+  }, [components, searchVal]);
 
   const onDragStart = (id: string) => {
     setLiveText(t("onDragStart", { id }));
@@ -154,8 +123,6 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
           providerType={defaultConsoleDisplayName}
           refresh={refresh}
           open={isCreateModalOpen}
-          // save={save}
-          id={id}
         />
       )}
 
@@ -186,7 +153,6 @@ export const KeysTabInner = ({ components }: KeysTabInnerProps) => {
                 <Dropdown
                   data-testid="addProviderDropdown"
                   className="add-provider-dropdown"
-                  // onClick={() => toggleAddProviderModal()}
                   isOpen={providerDropdownOpen}
                   toggle={
                     <DropdownToggle
@@ -309,11 +275,13 @@ type KeysProps = {
   components: ComponentRepresentation[];
   realmComponents: ComponentRepresentation[];
   keyProviderComponentTypes: ComponentTypeRepresentation[];
+  refresh: () => void;
 };
 
 export const KeysProviderTab = ({
   components,
   keyProviderComponentTypes,
+  refresh,
   ...props
 }: KeysProps) => {
   return (
@@ -326,6 +294,7 @@ export const KeysProviderTab = ({
         return { ...component, providerDescription: provider?.helpText };
       })}
       keyProviderComponentTypes={keyProviderComponentTypes}
+      refresh={refresh}
       {...props}
     />
   );
