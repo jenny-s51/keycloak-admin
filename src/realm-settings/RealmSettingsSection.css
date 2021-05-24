@@ -35,9 +35,6 @@ article.pf-c-card.pf-m-flat.kc-email-connection
   padding-left: 0px;
   padding-bottom: var(--pf-global--spacer--2xl);
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 button#kc-certificate.pf-c-button.pf-m-secondary {
   margin-left: var(--pf-global--spacer--md);
 }
@@ -47,10 +44,6 @@ button#kc-certificate.pf-c-button.pf-m-secondary {
 }
 
 button.pf-c-data-list__item-draggable-button.pf-m-disabled.header-drag-button {
-<<<<<<< HEAD
-=======
-  /* --pf-c-data-list__item-draggable-button-icon--Color: white; */
->>>>>>> add providers and search functionality
   display: none;
 }
 
@@ -69,24 +62,15 @@ button.pf-c-button.pf-m-link.add-provider {
 .pf-c-toolbar__group.providers-toolbar {
   padding-left: var(--pf-c-toolbar__content--PaddingLeft);
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 .pf-c-form__group-label {
   display: flex;
   align-items: start;
 }
-=======
->>>>>>> wip keys
-=======
 
 .pf-c-data-list__item-row.test {
   font-weight: bold;
 }
->>>>>>> wip key providers
-=======
->>>>>>> add providers and search functionality
-=======
 
 .pf-c-modal-box.add-provider-modal.pf-m-md {
   max-height: calc(100vh - 225px);
@@ -94,7 +78,9 @@ button.pf-c-button.pf-m-link.add-provider {
 
 .pf-c-modal-box__body {
   overflow: visible;
-  /* height: calc(70vh - 225px); */
-
 }
->>>>>>> add provider wip
+
+.pf-c-form__group-label {
+  display: flex;
+  align-items: start;
+}

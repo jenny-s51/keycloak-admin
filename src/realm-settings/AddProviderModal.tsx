@@ -3,6 +3,7 @@ import {
   AlertVariant,
   Button,
   ButtonVariant,
+  FileUpload,
   Form,
   FormGroup,
   Modal,
@@ -55,7 +56,7 @@ AddProviderModalProps) => {
     isEllipticCurveDropdownOpen,
     setIsEllipticCurveDropdownOpen,
   ] = useState(false);
-
+  const [isRSAalgDropdownOpen, setIsRSAalgDropdownOpen] = useState(false);
   // const [isModalOpen, setIsModalOpen] = useState(true);
   const [displayName, setDisplayName] = useState("");
   const realm = useRealm();
@@ -90,9 +91,10 @@ AddProviderModalProps) => {
       addAlert(t("realm-settings:saveProviderSuccess"), AlertVariant.success);
       handleModalToggle!();
     } catch (error) {
-      console.log("iooops", error.response.data.errorMessage)
+      console.log("iooops", error.response.data.errorMessage);
       addAlert(
-        t("realm-settings:saveProviderError") + error.response?.data?.errorMessage || error,
+        t("realm-settings:saveProviderError") +
+          error.response?.data?.errorMessage || error,
         // , {
         //   error: error.response?.data?.errorMessage || error,
         // }),
@@ -237,50 +239,117 @@ AddProviderModalProps) => {
             )}
           />
         </FormGroup>
-        {providerType === ("rsa" || "rsa-generated") && (
-          <FormGroup
-            label={t("realm-settings:algorithm")}
-            fieldId="kc-algorithm"
-            labelIcon={
-              <HelpItem
-                helpText="realm-settings-help:algorithm"
-                forLabel={t("algorithm")}
-                forID="kc-algorithm"
+        {providerType === "rsa" && (
+          <>
+            <FormGroup
+              label={t("realm-settings:algorithm")}
+              fieldId="kc-algorithm"
+              labelIcon={
+                <HelpItem
+                  helpText="realm-settings-help:algorithm"
+                  forLabel={t("algorithm")}
+                  forID="kc-algorithm"
+                />
+              }
+            >
+              <Controller
+                name="algorithm"
+                // control={control}
+                defaultValue=""
+                render={({ onChange, value }) => (
+                  <Select
+                    toggleId="kc-rsa-algorithm"
+                    onToggle={() =>
+                      setIsRSAalgDropdownOpen(!isRSAalgDropdownOpen)
+                    }
+                    onSelect={(_, value) => {
+                      onChange(value as string);
+                      setIsRSAalgDropdownOpen(false);
+                    }}
+                    selections={[value + ""]}
+                    variant={SelectVariant.single}
+                    aria-label={t("algorithm")}
+                    isOpen={isRSAalgDropdownOpen}
+                    // placeholderText="Select a theme"
+                    data-testid="select-rsa-algorithm"
+                  >
+                    {allComponentTypes[4].properties[3].options!.map(
+                      (p, idx) => (
+                        <SelectOption
+                          selected={p === value}
+                          key={`rsa-algorithm-${idx}`}
+                          value={p}
+                        ></SelectOption>
+                      )
+                    )}
+                  </Select>
+                )}
               />
-            }
-          >
-            <Controller
-              name="algorithm"
-              // control={control}
-              defaultValue=""
-              render={({ onChange, value }) => (
-                <Select
-                  toggleId="kc-email-theme"
-                  onToggle={() => {}}
-                  onSelect={(_, value) => {
-                    onChange(value as string);
-                    // setEmailThemeOpen(false);
-                  }}
-                  selections={value}
-                  variant={SelectVariant.single}
-                  aria-label={t("algorithm")}
-                  // isOpen={emailThemeOpen}
-                  // placeholderText="Select a theme"
-                  data-testid="select-algorithm"
-                >
-                  {/* {themeTypes.email.map((theme, idx) => (
-                    <SelectOption
-                      selected={theme.name === value}
-                      key={`email-theme-${idx}`}
-                      value={theme.name}
-                    >
-                      {t(`${theme.name}`)}
-                    </SelectOption>
-                  ))} */}
-                </Select>
-              )}
-            />
-          </FormGroup>
+            </FormGroup>
+            <FormGroup
+              label={t("realm-settings:privateRSAKey")}
+              fieldId="kc-aes-keysize"
+              // labelIcon={
+              //   <HelpItem
+              //     helpText="realm-settings-help:emailTheme"
+              //     forLabel={t("emailTheme")}
+              //     forID="kc-email-theme"
+              //   />
+              // }
+            >
+              <Controller
+                name="config.privateKey"
+                control={control}
+                defaultValue={[]}
+                render={({ onChange, value, idx }) => (
+                  <FileUpload
+                    id="importFile"
+                    type="text"
+                    value={value.value}
+                    filename={value.filename}
+                    // onChange={(value) => {
+                    //   console.log("dddd", typeof value);
+                    //   onChange({value});
+
+                    // }}
+                    onChange={(value, filename) => onChange({ value, filename })}
+                  />
+                )}
+              />
+            </FormGroup>
+            <FormGroup
+              label={t("realm-settings:x509Certificate")}
+              fieldId="kc-aes-keysize"
+              // labelIcon={
+              //   <HelpItem
+              //     helpText="realm-settings-help:emailTheme"
+              //     forLabel={t("emailTheme")}
+              //     forID="kc-email-theme"
+              //   />
+              // }
+            >
+              <Controller
+                name="config.certificate"
+                control={control}
+                defaultValue={[]}
+                render={({ onChange, value }) => (
+                  <FileUpload
+                    id="importFile"
+                    type="text"
+                    value={value.value}
+                    filename={value.filename}
+                    // onChange={(value) => {
+                    //   console.log("therapy", value);
+                    //   onChange({ value });
+                    // }}
+                    onChange={(value) => {
+                      onChange([value + ""]);
+                    }}
+                  />
+                )}
+              />
+            </FormGroup>
+          </>
         )}
 
         {providerType === "aes-generated" && (
