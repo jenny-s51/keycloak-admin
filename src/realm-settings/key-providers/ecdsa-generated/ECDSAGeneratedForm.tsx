@@ -25,7 +25,7 @@ import { ViewHeader } from "../../../components/view-header/ViewHeader";
 import { convertToFormValues } from "../../../util";
 import { useAlerts } from "../../../components/alert/Alerts";
 
-type AESGeneratedFormProps = {
+type ECDSAGeneratedFormProps = {
   handleModalToggle?: () => void;
   refresh?: () => void;
   editMode?: boolean;
@@ -36,12 +36,12 @@ export interface MatchParams {
   providerType: string;
 }
 
-export const AESGeneratedForm = ({
+export const ECDSAGeneratedForm = ({
   editMode,
   providerType,
   handleModalToggle,
   refresh,
-}: AESGeneratedFormProps) => {
+}: ECDSAGeneratedFormProps) => {
   const { t } = useTranslation("realm-settings");
   const serverInfo = useServerInfo();
   const [isKeySizeDropdownOpen, setIsKeySizeDropdownOpen] = useState(false);
@@ -95,10 +95,10 @@ export const AESGeneratedForm = ({
     Object.entries(component).map(([key, value]) => {
       if (
         key === "config" &&
-        component.config?.secretSize &&
+        component.config?.ecdsaEllipticCurveKey &&
         component.config?.active
       ) {
-        form.setValue("config.secretSize", value.secretSize[0]);
+        form.setValue("config.secretSize", value.ecdsaEllipticCurveKey[0]);
 
         form.setValue("config.active", value.active[0]);
 
@@ -123,7 +123,7 @@ export const AESGeneratedForm = ({
   const allComponentTypes =
     serverInfo.componentTypes?.["org.keycloak.keys.KeyProvider"] ?? [];
 
-  const aesSecretSizeOptions = allComponentTypes[0].properties[3].options;
+  const ecdsaEllipticCurveOptions = allComponentTypes[1].properties[3].options;
 
   return (
     <FormAccess
@@ -284,23 +284,23 @@ export const AESGeneratedForm = ({
         />
       </FormGroup>
       <FormGroup
-        label={t("AESKeySize")}
-        fieldId="kc-aes-keysize"
+        label={t("ellipticCurve")}
+        fieldId="kc-elliptic-curve"
         labelIcon={
           <HelpItem
-            helpText="realm-settings-help:AESKeySize"
-            forLabel={t("AESKeySize")}
-            forID="kc-aes-key-size"
+            helpText="realm-settings-help:ellipticCurve"
+            forLabel={t("ellipticCurve")}
+            forID="kc-elliptic-curve"
           />
         }
       >
         <Controller
-          name="config.secretSize"
+          name="config.ecdsaEllipticCurveKey"
           control={form.control}
-          defaultValue={["16"]}
+          defaultValue={["P-256"]}
           render={({ onChange, value }) => (
             <Select
-              toggleId="kc-aes-keysize"
+              toggleId="kc-ecdsa-elliptic-curve"
               onToggle={() => setIsKeySizeDropdownOpen(!isKeySizeDropdownOpen)}
               onSelect={(_, value) => {
                 onChange([value.toString()]);
@@ -309,10 +309,10 @@ export const AESGeneratedForm = ({
               selections={[value.toString()]}
               isOpen={isKeySizeDropdownOpen}
               variant={SelectVariant.single}
-              aria-label={t("aesKeySize")}
-              data-testid="select-secret-size"
+              aria-label={t("ellipticCurve")}
+              data-testid="select-elliptic-curve-size"
             >
-              {aesSecretSizeOptions?.map((item) => (
+              {ecdsaEllipticCurveOptions?.map((item) => (
                 <SelectOption
                   selected={item === value}
                   key={item}
@@ -323,9 +323,9 @@ export const AESGeneratedForm = ({
           )}
         />
       </FormGroup>
-      <ActionGroup className="kc-AESform-buttons">
+      <ActionGroup className="kc-ecdsa-form-buttons">
         <Button
-          className="kc-AESform-save-button"
+          className="kc-ecdsa-form-save-button"
           data-testid="add-provider-button"
           variant="primary"
           type="submit"
@@ -333,7 +333,7 @@ export const AESGeneratedForm = ({
           {t("common:save")}
         </Button>
         <Button
-          className="kc-AESform-cancel-button"
+          className="kc-ecdsa-form-cancel-button"
           onClick={(!editMode && handleModalToggle) || undefined}
           variant="link"
         >
@@ -344,7 +344,7 @@ export const AESGeneratedForm = ({
   );
 };
 
-export const AESGeneratedSettings = () => {
+export const ECDSAGeneratedSettings = () => {
   const { t } = useTranslation("realm-settings");
   const providerId = useRouteMatch<MatchParams>(
     "/:realm/realm-settings/keys/:id?/:providerType?/settings"
@@ -353,7 +353,7 @@ export const AESGeneratedSettings = () => {
     <>
       <ViewHeader titleKey={t("editProvider")} subKey={providerId} />
       <PageSection variant="light">
-        <AESGeneratedForm providerType={providerId!} editMode />
+        <ECDSAGeneratedForm providerType={providerId!} editMode />
       </PageSection>
     </>
   );

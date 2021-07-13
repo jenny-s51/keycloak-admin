@@ -40,7 +40,7 @@ import { Link, useRouteMatch } from "react-router-dom";
 import { AESGeneratedModal } from "./key-providers/aes-generated/AESGeneratedModal";
 import { JavaKeystoreModal } from "./JavaKeystoreModal";
 import { HMACGeneratedModal } from "./HMACGeneratedModal";
-import { ECDSAGeneratedModal } from "./ECDSAGeneratedModal";
+import { ECDSAGeneratedModal } from "./key-providers/ecdsa-generated/ECDSAGeneratedModal";
 import { RSAModal } from "./RSAModal";
 import { RSAGeneratedModal } from "./RSAGeneratedModal";
 
@@ -84,13 +84,11 @@ export const KeysTabInner = ({ components, refresh }: KeysTabInnerProps) => {
   const [itemOrder, setItemOrder] = useState<string[]>([]);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
 
-  const [defaultConsoleDisplayName, setDefaultConsoleDisplayName] = useState(
-    ""
-  );
+  const [defaultConsoleDisplayName, setDefaultConsoleDisplayName] =
+    useState("");
 
-  const [selectedComponent, setSelectedComponent] = useState<
-    ComponentRepresentation
-  >();
+  const [selectedComponent, setSelectedComponent] =
+    useState<ComponentRepresentation>();
 
   const [liveText, setLiveText] = useState("");
 
