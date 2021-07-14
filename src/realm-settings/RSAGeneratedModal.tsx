@@ -43,14 +43,8 @@ export const RSAGeneratedModal = ({
   const [isKeySizeDropdownOpen, setIsKeySizeDropdownOpen] = useState(false);
   const [isRSAalgDropdownOpen, setIsRSAalgDropdownOpen] = useState(false);
 
-<<<<<<< HEAD
-  const allComponentTypes = serverInfo.componentTypes![
-    "org.keycloak.keys.KeyProvider"
-  ];
-=======
   const allComponentTypes =
     serverInfo.componentTypes?.["org.keycloak.keys.KeyProvider"] ?? [];
->>>>>>> 9ad9d6c314de4a24800d73656eb778f229350dcc
 
   const save = async (component: ComponentRepresentation) => {
     try {
