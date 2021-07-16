@@ -41,15 +41,23 @@ export const ECDSAGeneratedModal = ({
   const adminClient = useAdminClient();
   const { addAlert } = useAlerts();
   const { handleSubmit, control } = useForm({});
-  const [isEllipticCurveDropdownOpen, setIsEllipticCurveDropdownOpen] =
-    useState(false);
+  const [
+    isEllipticCurveDropdownOpen,
+    setIsEllipticCurveDropdownOpen,
+  ] = useState(false);
   const [isRSAalgDropdownOpen, setIsRSAalgDropdownOpen] = useState(false);
 
   const [keyFileName, setKeyFileName] = useState("");
   const [certificateFileName, setCertificateFileName] = useState("");
 
+<<<<<<< HEAD
+  const allComponentTypes = serverInfo.componentTypes![
+    "org.keycloak.keys.KeyProvider"
+  ];
+=======
   const allComponentTypes =
     serverInfo.componentTypes?.["org.keycloak.keys.KeyProvider"] ?? [];
+>>>>>>> 9ad9d6c314de4a24800d73656eb778f229350dcc
 
   const save = async (component: ComponentRepresentation) => {
     try {
